@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarabot - API Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0A0A1A 0%, #1A0A2A 50%, #0A0A1A 100%);
+            color: #E0E0E0;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #9C27B0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .test-section {
+            background: linear-gradient(145deg, rgba(26, 10, 42, 0.9), rgba(10, 10, 26, 0.9));
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(156, 39, 176, 0.3);
+        }
+
+        .test-section h2 {
+            color: #00BCD4;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #9C27B0, #673AB7);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            transition: transform 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .result {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .success {
+            border-left: 4px solid #4CAF50;
+        }
+
+        .error {
+            border-left: 4px solid #F44336;
+        }
+
+        .loading {
+            border-left: 4px solid #FF9800;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔮 Tarabot API Test</h1>
+
+        <div class="test-section">
+            <h2>Health Check</h2>
+            <button class="btn" onclick="testHealth()">Test /api/health</button>
+            <div id="health-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Authentication</h2>
+            <button class="btn" onclick="testAuth()">Test /api/auth/telegram</button>
+            <div id="auth-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Readings</h2>
+            <button class="btn" onclick="testReadings()">Test /api/readings</button>
+            <div id="readings-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>AI Interpretation</h2>
+            <button class="btn" onclick="testAI()">Test /api/ai/interpret</button>
+            <div id="ai-result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        async function testHealth() {
+            const resultDiv = document.getElementById('health-result');
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = 'Testing /api/health...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/health`);
+                const data = await response.json();
+                
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ SUCCESS (${response.status})\n\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ERROR\n\n${error.message}`;
+            }
+        }
+
+        async function testAuth() {
+            const resultDiv = document.getElementById('auth-result');
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = 'Testing /api/auth/telegram...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/telegram`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        initData: 'mock_init_data_for_testing'
+                    })
+                });
+                const data = await response.json();
+                
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ SUCCESS (${response.status})\n\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ERROR\n\n${error.message}`;
+            }
+        }
+
+        async function testReadings() {
+            const resultDiv = document.getElementById('readings-result');
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = 'Testing /api/readings...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/readings`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        theme: 'Love and Relationships',
+                        layout: '3',
+                        deckId: 'classic'
+                    })
+                });
+                const data = await response.json();
+                
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ SUCCESS (${response.status})\n\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ERROR\n\n${error.message}`;
+            }
+        }
+
+        async function testAI() {
+            const resultDiv = document.getElementById('ai-result');
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = 'Testing /api/ai/interpret...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/ai/interpret`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        readingId: 'test_reading_123',
+                        context: 'Test interpretation request'
+                    })
+                });
+                const data = await response.json();
+                
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ SUCCESS (${response.status})\n\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ERROR\n\n${error.message}`;
+            }
+        }
+
+        // Auto-test health on page load
+        window.addEventListener('load', testHealth);
+    </script>
+</body>
+</html>
