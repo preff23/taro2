@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Tarabot - AI Tarot Readings</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--tg-theme-bg-color, #0A0A1A);
+            color: var(--tg-theme-text-color, #E0E0E0);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 1rem;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-top: 1rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #9C27B0, #00BCD4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1rem;
+            color: var(--tg-theme-hint-color, #B0B0B0);
+            line-height: 1.4;
+        }
+
+        .user-info {
+            background: var(--tg-theme-secondary-bg-color, rgba(156, 39, 176, 0.1));
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .subscription-badge {
+            background: linear-gradient(45deg, #9C27B0, #673AB7);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
+        .reading-form {
+            background: var(--tg-theme-secondary-bg-color, rgba(26, 10, 42, 0.8));
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--tg-theme-button-color, rgba(156, 39, 176, 0.4));
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--tg-theme-button-color, #00BCD4);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--tg-theme-button-color, rgba(156, 39, 176, 0.4));
+            border-radius: 10px;
+            background: var(--tg-theme-bg-color, rgba(10, 10, 26, 0.8));
+            color: var(--tg-theme-text-color, #E0E0E0);
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--tg-theme-button-color, #9C27B0);
+            box-shadow: 0 0 10px rgba(156, 39, 176, 0.3);
+        }
+
+        .btn {
+            background: var(--tg-theme-button-color, linear-gradient(45deg, #9C27B0, #673AB7));
+            color: var(--tg-theme-button-text-color, white);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .card {
+            background: var(--tg-theme-secondary-bg-color, rgba(26, 10, 42, 0.8));
+            border-radius: 15px;
+            padding: 1rem;
+            border: 1px solid var(--tg-theme-button-color, rgba(156, 39, 176, 0.4));
+            text-align: center;
+            transition: all 0.3s ease;
+            animation: cardAppear 0.6s ease-out;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(156, 39, 176, 0.3);
+        }
+
+        .card-name {
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--tg-theme-button-color, #9C27B0);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-position {
+            font-size: 0.8rem;
+            color: var(--tg-theme-hint-color, #00BCD4);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-orientation {
+            font-size: 0.7rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .card-orientation.upright {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+
+        .card-orientation.reversed {
+            background: rgba(244, 67, 54, 0.2);
+            color: #F44336;
+        }
+
+        .card-meaning {
+            font-size: 0.8rem;
+            color: var(--tg-theme-hint-color, #B0B0B0);
+            line-height: 1.3;
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.8) rotateY(180deg);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) rotateY(0deg);
+            }
+        }
+
+        .interpretation {
+            background: var(--tg-theme-secondary-bg-color, rgba(26, 10, 42, 0.8));
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border: 1px solid var(--tg-theme-button-color, rgba(156, 39, 176, 0.4));
+        }
+
+        .interpretation h3 {
+            color: var(--tg-theme-button-color, #00BCD4);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .interpretation-summary {
+            background: rgba(156, 39, 176, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--tg-theme-button-color, #9C27B0);
+        }
+
+        .interpretation-full {
+            line-height: 1.5;
+            color: var(--tg-theme-text-color, #E0E0E0);
+            font-size: 0.9rem;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(156, 39, 176, 0.3);
+            border-top: 3px solid var(--tg-theme-button-color, #9C27B0);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid #F44336;
+            color: #F44336;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        .success {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid #4CAF50;
+            color: #4CAF50;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        .main-button {
+            background: var(--tg-theme-button-color, #9C27B0);
+            color: var(--tg-theme-button-text-color, white);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .main-button:hover {
+            opacity: 0.9;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔮 Tarabot</h1>
+            <p>AI-powered Tarot readings in your pocket</p>
+        </div>
+
+        <div class="user-info" id="user-info" style="display: none;">
+            <div class="subscription-badge" id="subscription-badge">FREE</div>
+            <div id="user-name">Welcome!</div>
+        </div>
+
+        <div class="reading-form">
+            <h2 style="color: var(--tg-theme-button-color, #9C27B0); margin-bottom: 1rem; font-size: 1.3rem;">Create Your Reading</h2>
+            
+            <div class="form-group">
+                <label for="theme">What would you like guidance on?</label>
+                <select id="theme">
+                    <option value="general">General Life Guidance</option>
+                    <option value="love">Love & Relationships</option>
+                    <option value="career">Career & Work</option>
+                    <option value="money">Money & Finances</option>
+                    <option value="health">Health & Wellness</option>
+                    <option value="family">Family & Friends</option>
+                    <option value="spiritual">Spiritual Growth</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="layout">Choose your spread:</label>
+                <select id="layout">
+                    <option value="1">Single Card - Quick Insight</option>
+                    <option value="3" selected>Three Cards - Past, Present, Future</option>
+                    <option value="5">Five Cards - Celtic Cross</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="context">Additional context (optional):</label>
+                <input type="text" id="context" placeholder="Tell me more about your situation...">
+            </div>
+
+            <button class="btn" onclick="createReading()">🔮 Get Your Reading</button>
+        </div>
+
+        <!-- Cards Display -->
+        <div id="cards-container" class="cards-container" style="display: none;"></div>
+
+        <!-- Interpretation -->
+        <div id="interpretation" class="interpretation" style="display: none;">
+            <h3>🤖 AI Interpretation</h3>
+            <div id="interpretation-content"></div>
+            <button class="main-button" onclick="saveToDiary()">📖 Save to Diary</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        
+        // Configure WebApp
+        tg.ready();
+        tg.expand();
+        
+        // Set theme colors
+        tg.setHeaderColor('#1A0A2A');
+        tg.setBackgroundColor('#0A0A1A');
+
+        const API_BASE = '/api';
+        let currentUser = null;
+        let currentReading = null;
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        async function initializeApp() {
+            try {
+                // Get user data from Telegram
+                const user = tg.initDataUnsafe?.user;
+                if (user) {
+                    currentUser = user;
+                    document.getElementById('user-name').textContent = `Hello, ${user.first_name || 'User'}!`;
+                    document.getElementById('user-info').style.display = 'block';
+                }
+
+                // Authenticate with backend
+                await authenticateUser();
+            } catch (error) {
+                console.error('Initialization error:', error);
+            }
+        }
+
+        async function authenticateUser() {
+            try {
+                const initData = tg.initData;
+                if (!initData) {
+                    console.log('No initData available, using demo mode');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE}/auth/telegram`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        initData
+                    })
+                });
+
+                const data = await response.json();
+                if (data.ok) {
+                    currentUser = data.data.user;
+                    document.getElementById('subscription-badge').textContent = currentUser.subscription;
+                }
+            } catch (error) {
+                console.error('Authentication error:', error);
+            }
+        }
+
+        async function createReading() {
+            const theme = document.getElementById('theme').value;
+            const layout = document.getElementById('layout').value;
+            const context = document.getElementById('context').value;
+
+            const btn = document.querySelector('.btn');
+            btn.disabled = true;
+            btn.textContent = '🔮 Creating Reading...';
+
+            try {
+                // Mock reading creation for demo
+                const mockCards = [
+                    { id: '1', name: 'The Fool', code: '0', upright: true, meaning: 'New beginnings and fresh starts', keywords: ['new', 'innocence'] },
+                    { id: '2', name: 'The Magician', code: 'I', upright: true, meaning: 'Manifestation and personal power', keywords: ['power', 'will'] },
+                    { id: '3', name: 'The High Priestess', code: 'II', upright: false, meaning: 'Hidden knowledge and intuition', keywords: ['intuition', 'mystery'] },
+                    { id: '4', name: 'The Empress', code: 'III', upright: true, meaning: 'Fertility and abundance', keywords: ['fertility', 'nature'] },
+                    { id: '5', name: 'The Emperor', code: 'IV', upright: true, meaning: 'Authority and structure', keywords: ['authority', 'control'] }
+                ];
+
+                const numCards = parseInt(layout);
+                const selectedCards = mockCards.slice(0, numCards);
+                
+                currentReading = {
+                    id: 'reading_' + Date.now(),
+                    theme,
+                    layout,
+                    positions: getPositions(layout),
+                    cards: selectedCards,
+                    createdAt: new Date()
+                };
+
+                displayCards(currentReading);
+                await generateInterpretation(currentReading.id, context);
+                
+                // Show main button
+                tg.MainButton.setText('Save Reading');
+                tg.MainButton.show();
+                tg.MainButton.onClick(saveToDiary);
+
+            } catch (error) {
+                showError('Error creating reading: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔮 Get Your Reading';
+            }
+        }
+
+        function getPositions(layout) {
+            switch (layout) {
+                case '1':
+                    return ['General Guidance'];
+                case '3':
+                    return ['Past', 'Present', 'Future'];
+                case '5':
+                    return ['Situation', 'Challenge', 'Past', 'Future', 'Outcome'];
+                default:
+                    return [];
+            }
+        }
+
+        function displayCards(reading) {
+            const container = document.getElementById('cards-container');
+            container.style.display = 'block';
+            container.innerHTML = '';
+
+            reading.cards.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'card';
+                cardElement.innerHTML = `
+                    <div class="card-position">${reading.positions ? reading.positions[index] : `Position ${index + 1}`}</div>
+                    <div class="card-name">${card.name}</div>
+                    <div class="card-orientation ${card.upright ? 'upright' : 'reversed'}">
+                        ${card.upright ? 'Upright' : 'Reversed'}
+                    </div>
+                    <div class="card-meaning">${card.meaning}</div>
+                `;
+                container.appendChild(cardElement);
+            });
+        }
+
+        async function generateInterpretation(readingId, context) {
+            try {
+                // Mock AI interpretation
+                const interpretations = {
+                    general: "This reading reveals a journey of personal growth and transformation. The cards suggest that you are at a pivotal moment in your life where new opportunities are presenting themselves.",
+                    love: "Your love reading indicates a period of emotional growth and deeper connections. The cards suggest that understanding and communication will be key to your relationship success.",
+                    career: "Your career reading shows a time of professional advancement and new opportunities. The cards suggest that your hard work and dedication will soon pay off.",
+                    money: "Your financial reading indicates a period of stability and growth. The cards suggest that careful planning and wise investments will lead to prosperity.",
+                    health: "Your health reading suggests a focus on balance and wellness. The cards indicate that taking care of your physical and mental health will be important.",
+                    family: "Your family reading shows strong bonds and support systems. The cards suggest that family connections will be a source of strength and guidance.",
+                    spiritual: "Your spiritual reading indicates a deepening of your inner wisdom and connection to higher purpose. The cards suggest a time of spiritual growth and enlightenment."
+                };
+
+                const theme = document.getElementById('theme').value;
+                const interpretation = interpretations[theme] || interpretations.general;
+
+                displayInterpretation({
+                    summary: `Your ${theme} reading reveals important insights about your current path.`,
+                    fullText: interpretation + (context ? ` Regarding your specific situation: ${context}` : ''),
+                    tone: 'supportive'
+                });
+            } catch (error) {
+                showError('Error generating interpretation: ' + error.message);
+            }
+        }
+
+        function displayInterpretation(interpretation) {
+            const container = document.getElementById('interpretation');
+            container.style.display = 'block';
+            
+            document.getElementById('interpretation-content').innerHTML = `
+                <div class="interpretation-summary">
+                    <strong>Summary:</strong> ${interpretation.summary}
+                </div>
+                <div class="interpretation-full">
+                    ${interpretation.fullText}
+                </div>
+            `;
+        }
+
+        async function saveToDiary() {
+            if (!currentReading) return;
+
+            try {
+                showSuccess('Reading saved to your diary!');
+                
+                // Hide main button
+                tg.MainButton.hide();
+                
+                // Send data back to Telegram
+                tg.sendData(JSON.stringify({
+                    type: 'reading_saved',
+                    reading: currentReading,
+                    timestamp: new Date().toISOString()
+                }));
+                
+            } catch (error) {
+                showError('Error saving to diary: ' + error.message);
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            document.querySelector('.container').insertBefore(errorDiv, document.querySelector('.reading-form'));
+            
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.textContent = message;
+            document.querySelector('.container').insertBefore(successDiv, document.querySelector('.reading-form'));
+            
+            setTimeout(() => {
+                successDiv.remove();
+            }, 3000);
+        }
+
+        // Handle Telegram WebApp events
+        tg.onEvent('themeChanged', function() {
+            // Update theme colors when user changes theme
+            document.body.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color);
+            document.body.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color);
+            document.body.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color);
+        });
+
+        // Show back button
+        tg.BackButton.show();
+        tg.BackButton.onClick(() => {
+            tg.close();
+        });
+    </script>
+</body>
+</html>

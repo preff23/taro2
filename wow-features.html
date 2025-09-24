@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Таработ - Вау-фичи</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0A0B1A;
+            --bg-secondary: #1A1B2E;
+            --bg-tertiary: #2A2B3E;
+            --accent-mystic: #6366F1;
+            --accent-lunar: #8B5CF6;
+            --accent-crystal: #06B6D4;
+            --accent-gold: #F59E0B;
+            --text-primary: #F8FAFC;
+            --text-secondary: #CBD5E1;
+            --text-tertiary: #94A3B8;
+            --gradient-mystic: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            --gradient-lunar: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+            --gradient-crystal: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%);
+            --gradient-gold: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
+            --glow-mystic: 0 0 20px rgba(99, 102, 241, 0.3);
+            --glow-lunar: 0 0 20px rgba(139, 92, 246, 0.3);
+            --glow-crystal: 0 0 20px rgba(6, 182, 212, 0.3);
+            --glow-gold: 0 0 20px rgba(245, 158, 11, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            padding: 20px;
+            padding-top: calc(env(safe-area-inset-top) + 20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .back-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            flex: 1;
+        }
+
+        .pro-badge {
+            background: var(--gradient-gold);
+            color: white;
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        /* Main content */
+        .main-content {
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        /* Feature tabs */
+        .feature-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 30px;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 4px;
+        }
+
+        .feature-tab {
+            flex: 1;
+            background: transparent;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .feature-tab.active {
+            background: var(--gradient-mystic);
+            color: white;
+            box-shadow: var(--glow-mystic);
+        }
+
+        .feature-tab svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        /* Voice feature */
+        .voice-feature {
+            display: none;
+        }
+
+        .voice-feature.active {
+            display: block;
+        }
+
+        .voice-container {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voice-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.05); }
+        }
+
+        .voice-icon {
+            width: 120px;
+            height: 120px;
+            background: var(--gradient-mystic);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            box-shadow: var(--glow-mystic);
+            position: relative;
+            z-index: 1;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .voice-icon:hover {
+            transform: scale(1.05);
+        }
+
+        .voice-icon.recording {
+            animation: recording 1s ease-in-out infinite;
+        }
+
+        @keyframes recording {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .voice-icon svg {
+            width: 60px;
+            height: 60px;
+            fill: white;
+        }
+
+        .voice-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .voice-description {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .voice-status {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .voice-status-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .voice-waveform {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            height: 20px;
+        }
+
+        .voice-wave {
+            width: 4px;
+            background: var(--accent-mystic);
+            border-radius: 2px;
+            animation: wave 1s ease-in-out infinite;
+        }
+
+        .voice-wave:nth-child(1) { height: 8px; animation-delay: 0s; }
+        .voice-wave:nth-child(2) { height: 16px; animation-delay: 0.1s; }
+        .voice-wave:nth-child(3) { height: 12px; animation-delay: 0.2s; }
+        .voice-wave:nth-child(4) { height: 20px; animation-delay: 0.3s; }
+        .voice-wave:nth-child(5) { height: 8px; animation-delay: 0.4s; }
+
+        @keyframes wave {
+            0%, 100% { height: 8px; }
+            50% { height: 20px; }
+        }
+
+        .voice-actions {
+            display: flex;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-primary {
+            background: var(--gradient-mystic);
+            border: none;
+            border-radius: 16px;
+            padding: 16px 24px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            box-shadow: var(--glow-mystic);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--accent-mystic);
+            border-radius: 16px;
+            padding: 14px 24px;
+            color: var(--accent-mystic);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-mystic);
+            color: white;
+        }
+
+        /* Photo feature */
+        .photo-feature {
+            display: none;
+        }
+
+        .photo-feature.active {
+            display: block;
+        }
+
+        .photo-container {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .photo-upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: 40px 20px;
+            margin-bottom: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .photo-upload-area:hover {
+            border-color: var(--accent-mystic);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .photo-upload-area.dragover {
+            border-color: var(--accent-mystic);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .photo-upload-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-crystal);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            box-shadow: var(--glow-crystal);
+        }
+
+        .photo-upload-icon svg {
+            width: 40px;
+            height: 40px;
+            fill: white;
+        }
+
+        .photo-upload-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .photo-upload-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .photo-preview {
+            display: none;
+            margin-bottom: 24px;
+        }
+
+        .photo-preview.active {
+            display: block;
+        }
+
+        .photo-preview-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 16px;
+            object-fit: cover;
+            margin: 0 auto 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .photo-analysis {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .photo-analysis-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .photo-analysis-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* Gift feature */
+        .gift-feature {
+            display: none;
+        }
+
+        .gift-feature.active {
+            display: block;
+        }
+
+        .gift-container {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .gift-icon {
+            width: 120px;
+            height: 120px;
+            background: var(--gradient-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            box-shadow: var(--glow-gold);
+        }
+
+        .gift-icon svg {
+            width: 60px;
+            height: 60px;
+            fill: white;
+        }
+
+        .gift-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .gift-description {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .gift-form {
+            text-align: left;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--bg-tertiary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-mystic);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .gift-preview {
+            background: var(--bg-tertiary);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .gift-preview-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .gift-preview-content {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* Bottom navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 20px;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom));
+            display: flex;
+            justify-content: space-around;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .nav-item.active {
+            color: var(--accent-mystic);
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .nav-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        .nav-label {
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 16px;
+            }
+            
+            .voice-container,
+            .photo-container,
+            .gift-container {
+                padding: 24px;
+            }
+            
+            .voice-icon,
+            .gift-icon {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .voice-icon svg,
+            .gift-icon svg {
+                width: 50px;
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <button class="back-btn" onclick="goBack()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20 11H7.83L13.42 5.41L12 4L4 12L12 20L13.41 18.59L7.83 13H20V11Z"/>
+                </svg>
+            </button>
+            <h1 class="header-title">PRO Функции</h1>
+            <div class="pro-badge">PRO</div>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="main-content">
+        <!-- Feature tabs -->
+        <div class="feature-tabs animate-fadeInUp">
+            <button class="feature-tab active" onclick="switchFeature('voice')">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 14C13.66 14 15 12.66 15 11V5C15 3.34 13.66 2 12 2C10.34 2 9 3.34 9 5V11C9 12.66 10.34 14 12 14ZM19.1 11C19.1 7.93 16.97 5.4 14 5.04V7C16.24 7.4 17.9 9.02 17.9 11H19.1ZM14 17H10V15H14V17ZM12 20C8.69 20 6 17.31 6 14H8C8 16.21 9.79 18 12 18C14.21 18 16 16.21 16 14H18C18 17.31 15.31 20 12 20Z"/>
+                </svg>
+                Голос
+            </button>
+            <button class="feature-tab" onclick="switchFeature('photo')">
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 6H2V20C2 21.1 2.9 22 4 22H18V20H4V6ZM20 2H8C6.9 2 6 2.9 6 4V16C6 17.1 6.9 18 8 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2ZM20 16H8V4H20V16ZM12 6H14V8H12V6ZM12 10H14V12H12V10ZM12 14H16V16H12V14Z"/>
+                </svg>
+                Фото
+            </button>
+            <button class="feature-tab" onclick="switchFeature('gift')">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20 6H17.82C17.93 5.71 18 5.36 18 5C18 3.34 16.66 2 15 2C13.95 2 13.04 2.54 12.5 3.35L12 4.02L11.5 3.34C10.96 2.54 10.05 2 9 2C7.34 2 6 3.34 6 5C6 5.36 6.07 5.71 6.18 6H4C2.9 6 2 6.9 2 8V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V8C22 6.9 21.1 6 20 6ZM15 4C15.55 4 16 4.45 16 5S15.55 6 15 6 14 5.55 14 5 14.45 4 15 4ZM9 4C9.55 4 10 4.45 10 5S9.55 6 9 6 8 5.55 8 5 8.45 4 9 4ZM20 19H4V8H20V19Z"/>
+                </svg>
+                Подарки
+            </button>
+        </div>
+
+        <!-- Voice feature -->
+        <div class="voice-feature active animate-fadeInUp">
+            <div class="voice-container">
+                <div class="voice-icon" onclick="toggleRecording()">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 14C13.66 14 15 12.66 15 11V5C15 3.34 13.66 2 12 2C10.34 2 9 3.34 9 5V11C9 12.66 10.34 14 12 14ZM19.1 11C19.1 7.93 16.97 5.4 14 5.04V7C16.24 7.4 17.9 9.02 17.9 11H19.1ZM14 17H10V15H14V17ZM12 20C8.69 20 6 17.31 6 14H8C8 16.21 9.79 18 12 18C14.21 18 16 16.21 16 14H18C18 17.31 15.31 20 12 20Z"/>
+                    </svg>
+                </div>
+                <h2 class="voice-title">Голосовой вопрос</h2>
+                <p class="voice-description">
+                    Задайте свой вопрос голосом и получите персональный расклад Таро с ИИ-толкованием
+                </p>
+                <div class="voice-status">
+                    <p class="voice-status-text">Нажмите на микрофон и задайте вопрос</p>
+                    <div class="voice-waveform">
+                        <div class="voice-wave"></div>
+                        <div class="voice-wave"></div>
+                        <div class="voice-wave"></div>
+                        <div class="voice-wave"></div>
+                        <div class="voice-wave"></div>
+                    </div>
+                </div>
+                <div class="voice-actions">
+                    <button class="btn-primary" onclick="startVoiceReading()">
+                        Начать запись
+                    </button>
+                    <button class="btn-secondary" onclick="stopVoiceReading()">
+                        Остановить
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Photo feature -->
+        <div class="photo-feature animate-fadeInUp">
+            <div class="photo-container">
+                <div class="photo-upload-area" onclick="selectPhoto()" ondrop="handleDrop(event)" ondragover="handleDragOver(event)">
+                    <div class="photo-upload-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M4 6H2V20C2 21.1 2.9 22 4 22H18V20H4V6ZM20 2H8C6.9 2 6 2.9 6 4V16C6 17.1 6.9 18 8 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2ZM20 16H8V4H20V16ZM12 6H14V8H12V6ZM12 10H14V12H12V10ZM12 14H16V16H12V14Z"/>
+                        </svg>
+                    </div>
+                    <h3 class="photo-upload-text">Загрузите фото</h3>
+                    <p class="photo-upload-subtitle">Перетащите изображение или нажмите для выбора</p>
+                </div>
+                
+                <div class="photo-preview">
+                    <img class="photo-preview-image" src="" alt="Предварительный просмотр">
+                    <div class="photo-analysis">
+                        <h4 class="photo-analysis-title">Анализ изображения</h4>
+                        <p class="photo-analysis-text">ИИ анализирует ваше фото и создает персональный расклад...</p>
+                    </div>
+                </div>
+                
+                <div class="voice-actions">
+                    <button class="btn-primary" onclick="analyzePhoto()">
+                        Создать расклад
+                    </button>
+                    <button class="btn-secondary" onclick="clearPhoto()">
+                        Очистить
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gift feature -->
+        <div class="gift-feature animate-fadeInUp">
+            <div class="gift-container">
+                <div class="gift-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M20 6H17.82C17.93 5.71 18 5.36 18 5C18 3.34 16.66 2 15 2C13.95 2 13.04 2.54 12.5 3.35L12 4.02L11.5 3.34C10.96 2.54 10.05 2 9 2C7.34 2 6 3.34 6 5C6 5.36 6.07 5.71 6.18 6H4C2.9 6 2 6.9 2 8V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V8C22 6.9 21.1 6 20 6ZM15 4C15.55 4 16 4.45 16 5S15.55 6 15 6 14 5.55 14 5 14.45 4 15 4ZM9 4C9.55 4 10 4.45 10 5S9.55 6 9 6 8 5.55 8 5 8.45 4 9 4ZM20 19H4V8H20V19Z"/>
+                    </svg>
+                </div>
+                <h2 class="gift-title">Подарочный расклад</h2>
+                <p class="gift-description">
+                    Создайте персональный расклад Таро и подарите его другу или близкому человеку
+                </p>
+                
+                <div class="gift-form">
+                    <div class="form-group">
+                        <label class="form-label">Имя получателя</label>
+                        <input type="text" class="form-input" placeholder="Введите имя" id="recipientName">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Тема расклада</label>
+                        <select class="form-input" id="giftTheme">
+                            <option value="love">Любовь и отношения</option>
+                            <option value="career">Карьера и работа</option>
+                            <option value="future">Будущее и судьба</option>
+                            <option value="health">Здоровье и благополучие</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Персональное сообщение</label>
+                        <textarea class="form-input form-textarea" placeholder="Напишите пожелание или послание..." id="giftMessage"></textarea>
+                    </div>
+                </div>
+                
+                <div class="gift-preview">
+                    <h4 class="gift-preview-title">Предварительный просмотр</h4>
+                    <p class="gift-preview-content">
+                        <strong>Для:</strong> <span id="previewName">Имя получателя</span><br>
+                        <strong>Тема:</strong> <span id="previewTheme">Любовь и отношения</span><br>
+                        <strong>Сообщение:</strong> <span id="previewMessage">Ваше персональное послание</span>
+                    </p>
+                </div>
+                
+                <div class="voice-actions">
+                    <button class="btn-primary" onclick="createGift()">
+                        Создать подарок за 25 Stars
+                    </button>
+                    <button class="btn-secondary" onclick="previewGift()">
+                        Предварительный просмотр
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom navigation -->
+    <nav class="bottom-nav">
+        <div class="nav-item" onclick="goToMain()">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M10 20V14H14V20H19V12H22L12 3L2 12H5V20H10Z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Главная</span>
+        </div>
+        <div class="nav-item" onclick="openDiary()">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V5H19V19ZM7 7H17V9H7V7ZM7 11H17V13H7V11ZM7 15H14V17H7V15Z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Дневник</span>
+        </div>
+        <div class="nav-item" onclick="openAnalytics()">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M16 6L18.29 8.29L13.41 13.17L9.41 9.17L2 16.59L3.41 18L9.41 12L13.41 16L19.71 9.71L22 12V6H16Z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Аналитика</span>
+        </div>
+        <div class="nav-item" onclick="openProfile()">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Профиль</span>
+        </div>
+    </nav>
+
+    <script>
+        // Инициализация Telegram WebApp
+        const initTelegram = () => {
+            if (window.Telegram && window.Telegram.WebApp) {
+                Telegram.WebApp.ready();
+                Telegram.WebApp.expand();
+                
+                // Установка цветов темы
+                const theme = Telegram.WebApp.colorScheme;
+                if (theme === 'dark') {
+                    Telegram.WebApp.setHeaderColor('#1A1B2E');
+                    Telegram.WebApp.setBackgroundColor('#0A0B1A');
+                } else {
+                    Telegram.WebApp.setHeaderColor('#F8FAFC');
+                    Telegram.WebApp.setBackgroundColor('#FFFFFF');
+                }
+            }
+        };
+
+        // Переключение между функциями
+        const switchFeature = (feature) => {
+            // Скрыть все функции
+            document.querySelectorAll('.voice-feature, .photo-feature, .gift-feature').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Убрать активный класс с табов
+            document.querySelectorAll('.feature-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Показать выбранную функцию
+            document.querySelector(`.${feature}-feature`).classList.add('active');
+            
+            // Активировать соответствующий таб
+            event.target.classList.add('active');
+        };
+
+        // Голосовые функции
+        let isRecording = false;
+        let mediaRecorder = null;
+
+        const toggleRecording = () => {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        };
+
+        const startRecording = () => {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        mediaRecorder = new MediaRecorder(stream);
+                        mediaRecorder.start();
+                        isRecording = true;
+                        
+                        document.querySelector('.voice-icon').classList.add('recording');
+                        document.querySelector('.voice-status-text').textContent = 'Записывается...';
+                        
+                        mediaRecorder.ondataavailable = (event) => {
+                            // Обработка аудиоданных
+                            console.log('Аудиоданные получены');
+                        };
+                    })
+                    .catch(err => {
+                        console.error('Ошибка доступа к микрофону:', err);
+                        alert('Не удалось получить доступ к микрофону');
+                    });
+            } else {
+                alert('Ваш браузер не поддерживает запись аудио');
+            }
+        };
+
+        const stopRecording = () => {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+                
+                document.querySelector('.voice-icon').classList.remove('recording');
+                document.querySelector('.voice-status-text').textContent = 'Обработка аудио...';
+                
+                // Имитация обработки
+                setTimeout(() => {
+                    document.querySelector('.voice-status-text').textContent = 'Расклад готов!';
+                }, 2000);
+            }
+        };
+
+        const startVoiceReading = () => {
+            console.log('Начало голосового расклада...');
+            startRecording();
+        };
+
+        const stopVoiceReading = () => {
+            console.log('Остановка голосового расклада...');
+            stopRecording();
+        };
+
+        // Фото функции
+        const selectPhoto = () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = handlePhotoSelect;
+            input.click();
+        };
+
+        const handlePhotoSelect = (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const preview = document.querySelector('.photo-preview');
+                    const image = document.querySelector('.photo-preview-image');
+                    
+                    image.src = e.target.result;
+                    preview.classList.add('active');
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        const handleDrop = (event) => {
+            event.preventDefault();
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                handlePhotoSelect({ target: { files } });
+            }
+        };
+
+        const handleDragOver = (event) => {
+            event.preventDefault();
+            event.currentTarget.classList.add('dragover');
+        };
+
+        const analyzePhoto = () => {
+            console.log('Анализ фото...');
+            // Имитация анализа фото
+            setTimeout(() => {
+                alert('Расклад на основе фото готов!');
+            }, 2000);
+        };
+
+        const clearPhoto = () => {
+            document.querySelector('.photo-preview').classList.remove('active');
+            document.querySelector('.photo-upload-area').classList.remove('dragover');
+        };
+
+        // Подарочные функции
+        const updateGiftPreview = () => {
+            const name = document.getElementById('recipientName').value || 'Имя получателя';
+            const theme = document.getElementById('giftTheme').value;
+            const message = document.getElementById('giftMessage').value || 'Ваше персональное послание';
+            
+            const themeNames = {
+                love: 'Любовь и отношения',
+                career: 'Карьера и работа',
+                future: 'Будущее и судьба',
+                health: 'Здоровье и благополучие'
+            };
+            
+            document.getElementById('previewName').textContent = name;
+            document.getElementById('previewTheme').textContent = themeNames[theme];
+            document.getElementById('previewMessage').textContent = message;
+        };
+
+        const createGift = () => {
+            console.log('Создание подарка...');
+            // Проверка заполненности формы
+            const name = document.getElementById('recipientName').value;
+            if (!name) {
+                alert('Введите имя получателя');
+                return;
+            }
+            
+            // В реальном приложении здесь будет создание подарка
+            alert('Подарочный расклад создан и отправлен!');
+        };
+
+        const previewGift = () => {
+            updateGiftPreview();
+            console.log('Предварительный просмотр подарка...');
+        };
+
+        // Обработчики событий для формы подарка
+        document.getElementById('recipientName').addEventListener('input', updateGiftPreview);
+        document.getElementById('giftTheme').addEventListener('change', updateGiftPreview);
+        document.getElementById('giftMessage').addEventListener('input', updateGiftPreview);
+
+        // Навигация
+        const goBack = () => {
+            console.log('Возврат к предыдущему экрану...');
+        };
+
+        const goToMain = () => {
+            console.log('Переход к главному экрану...');
+        };
+
+        const openDiary = () => {
+            console.log('Открытие дневника...');
+        };
+
+        const openAnalytics = () => {
+            console.log('Открытие аналитики...');
+        };
+
+        const openProfile = () => {
+            console.log('Открытие профиля...');
+        };
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            initTelegram();
+            
+            // Анимация появления элементов
+            const elements = document.querySelectorAll('.animate-fadeInUp');
+            elements.forEach((el, index) => {
+                el.style.animationDelay = `${index * 0.1}s`;
+            });
+            
+            // Инициализация предварительного просмотра подарка
+            updateGiftPreview();
+        });
+
+        // Обработка изменения темы
+        if (window.Telegram && window.Telegram.WebApp) {
+            Telegram.WebApp.onEvent('themeChanged', () => {
+                const theme = Telegram.WebApp.colorScheme;
+                document.documentElement.setAttribute('data-theme', theme);
+            });
+        }
+    </script>
+</body>
+</html>

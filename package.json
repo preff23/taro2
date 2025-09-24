@@ -1,0 +1,26 @@
+{
+  "name": "tarabot-mini-app",
+  "version": "1.0.0",
+  "description": "Tarabot Telegram Mini App - AI-powered Tarot readings",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step needed for static files'",
+    "start": "vercel dev"
+  },
+  "keywords": [
+    "telegram",
+    "mini-app",
+    "tarot",
+    "ai",
+    "webapp"
+  ],
+  "author": "Tarabot Team",
+  "license": "MIT",
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

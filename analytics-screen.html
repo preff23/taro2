@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Таработ - Аналитика</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0A0B1A;
+            --bg-secondary: #1A1B2E;
+            --bg-tertiary: #2A2B3E;
+            --accent-mystic: #6366F1;
+            --accent-lunar: #8B5CF6;
+            --accent-crystal: #06B6D4;
+            --accent-gold: #F59E0B;
+            --text-primary: #F8FAFC;
+            --text-secondary: #CBD5E1;
+            --text-tertiary: #94A3B8;
+            --gradient-mystic: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            --gradient-lunar: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+            --gradient-crystal: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%);
+            --glow-mystic: 0 0 20px rgba(99, 102, 241, 0.3);
+            --glow-lunar: 0 0 20px rgba(139, 92, 246, 0.3);
+            --glow-crystal: 0 0 20px rgba(6, 182, 212, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            padding: 20px;
+            padding-top: calc(env(safe-area-inset-top) + 20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient-mystic);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .export-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .export-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* Main content */
+        .main-content {
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        /* Stats overview */
+        .stats-overview {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-mystic);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            box-shadow: var(--glow-mystic);
+        }
+
+        .stat-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-mystic);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-tertiary);
+        }
+
+        .stat-change {
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+
+        .stat-change.positive {
+            color: var(--accent-crystal);
+        }
+
+        .stat-change.negative {
+            color: var(--accent-gold);
+        }
+
+        /* Charts section */
+        .charts-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--gradient-lunar);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .section-icon svg {
+            width: 12px;
+            height: 12px;
+            fill: white;
+        }
+
+        .chart-container {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .chart-period {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+        }
+
+        .chart-content {
+            height: 200px;
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: var(--gradient-mystic);
+            border-radius: 4px 4px 0 0;
+            min-height: 4px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .chart-bar:hover {
+            opacity: 0.8;
+        }
+
+        .chart-bar::after {
+            content: attr(data-value);
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .chart-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+        }
+
+        /* Mood trends */
+        .mood-trends {
+            margin-bottom: 30px;
+        }
+
+        .mood-chart {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .mood-timeline {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .mood-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .mood-emoji {
+            font-size: 2rem;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .mood-item.active .mood-emoji {
+            background: var(--gradient-crystal);
+            box-shadow: var(--glow-crystal);
+        }
+
+        .mood-label {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+        }
+
+        .mood-count {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Card frequency */
+        .card-frequency {
+            margin-bottom: 30px;
+        }
+
+        .frequency-list {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .frequency-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .frequency-item:last-child {
+            border-bottom: none;
+        }
+
+        .frequency-card {
+            width: 40px;
+            height: 60px;
+            background: var(--gradient-mystic);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--glow-mystic);
+        }
+
+        .frequency-card svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        .frequency-info {
+            flex: 1;
+        }
+
+        .frequency-name {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .frequency-count {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+        }
+
+        .frequency-bar {
+            width: 60px;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .frequency-progress {
+            height: 100%;
+            background: var(--gradient-crystal);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Insights section */
+        .insights-section {
+            margin-bottom: 30px;
+        }
+
+        .insight-card {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .insight-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .insight-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-crystal);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .insight-icon svg {
+            width: 16px;
+            height: 16px;
+            fill: white;
+        }
+
+        .insight-title {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .insight-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* Bottom navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 20px;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom));
+            display: flex;
+            justify-content: space-around;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .nav-item.active {
+            color: var(--accent-mystic);
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .nav-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        .nav-label {
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 16px;
+            }
+            
+            .stats-overview {
+                grid-template-columns: 1fr;
+            }
+            
+            .mood-timeline {
+                gap: 8px;
+            }
+            
+            .mood-emoji {
+                font-size: 1.5rem;
+                width: 36px;
+                height: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1 class="header-title">Аналитика</h1>
+            <button class="export-btn" onclick="exportData()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2ZM18 20H6V4H13V9H18V20Z"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="main-content">
+        <!-- Stats overview -->
+        <section class="stats-overview animate-fadeInUp">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V5H19V19ZM7 7H17V9H7V7ZM7 11H17V13H7V11ZM7 15H14V17H7V15Z"/>
+                    </svg>
+                </div>
+                <div class="stat-number">24</div>
+                <div class="stat-label">Всего раскладов</div>
+                <div class="stat-change positive">+3 за неделю</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"/>
+                    </svg>
+                </div>
+                <div class="stat-number">4.8</div>
+                <div class="stat-label">Средний балл</div>
+                <div class="stat-change positive">+0.2 за месяц</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z"/>
+                    </svg>
+                </div>
+                <div class="stat-number">7</div>
+                <div class="stat-label">Дней подряд</div>
+                <div class="stat-change positive">Новый рекорд!</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z"/>
+                    </svg>
+                </div>
+                <div class="stat-number">85%</div>
+                <div class="stat-label">Точность прогнозов</div>
+                <div class="stat-change positive">+5% за месяц</div>
+            </div>
+        </section>
+
+        <!-- Charts section -->
+        <section class="charts-section animate-fadeInUp">
+            <h2 class="section-title">
+                <div class="section-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M16 6L18.29 8.29L13.41 13.17L9.41 9.17L2 16.59L3.41 18L9.41 12L13.41 16L19.71 9.71L22 12V6H16Z"/>
+                    </svg>
+                </div>
+                Активность по дням
+            </h2>
+            
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Расклады за неделю</h3>
+                    <span class="chart-period">7 дней</span>
+                </div>
+                <div class="chart-content">
+                    <div class="chart-bar" style="height: 60%;" data-value="2"></div>
+                    <div class="chart-bar" style="height: 80%;" data-value="3"></div>
+                    <div class="chart-bar" style="height: 40%;" data-value="1"></div>
+                    <div class="chart-bar" style="height: 90%;" data-value="4"></div>
+                    <div class="chart-bar" style="height: 70%;" data-value="3"></div>
+                    <div class="chart-bar" style="height: 85%;" data-value="3"></div>
+                    <div class="chart-bar" style="height: 75%;" data-value="3"></div>
+                </div>
+                <div class="chart-labels">
+                    <span>Пн</span>
+                    <span>Вт</span>
+                    <span>Ср</span>
+                    <span>Чт</span>
+                    <span>Пт</span>
+                    <span>Сб</span>
+                    <span>Вс</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mood trends -->
+        <section class="mood-trends animate-fadeInUp">
+            <h2 class="section-title">
+                <div class="section-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z"/>
+                    </svg>
+                </div>
+                Тренды настроения
+            </h2>
+            
+            <div class="mood-chart">
+                <div class="mood-timeline">
+                    <div class="mood-item active">
+                        <div class="mood-emoji">😊</div>
+                        <div class="mood-label">Отлично</div>
+                        <div class="mood-count">8</div>
+                    </div>
+                    <div class="mood-item">
+                        <div class="mood-emoji">😐</div>
+                        <div class="mood-label">Нормально</div>
+                        <div class="mood-count">12</div>
+                    </div>
+                    <div class="mood-item">
+                        <div class="mood-emoji">🤔</div>
+                        <div class="mood-label">Размышления</div>
+                        <div class="mood-count">3</div>
+                    </div>
+                    <div class="mood-item">
+                        <div class="mood-emoji">😔</div>
+                        <div class="mood-label">Грустно</div>
+                        <div class="mood-count">1</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Card frequency -->
+        <section class="card-frequency animate-fadeInUp">
+            <h2 class="section-title">
+                <div class="section-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"/>
+                    </svg>
+                </div>
+                Частота карт
+            </h2>
+            
+            <div class="frequency-list">
+                <div class="frequency-item">
+                    <div class="frequency-card">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"/>
+                        </svg>
+                    </div>
+                    <div class="frequency-info">
+                        <div class="frequency-name">Звезда</div>
+                        <div class="frequency-count">Появляется в 6 раскладах</div>
+                    </div>
+                    <div class="frequency-bar">
+                        <div class="frequency-progress" style="width: 85%;"></div>
+                    </div>
+                </div>
+                
+                <div class="frequency-item">
+                    <div class="frequency-card">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z"/>
+                        </svg>
+                    </div>
+                    <div class="frequency-info">
+                        <div class="frequency-name">Влюбленные</div>
+                        <div class="frequency-count">Появляется в 5 раскладах</div>
+                    </div>
+                    <div class="frequency-bar">
+                        <div class="frequency-progress" style="width: 70%;"></div>
+                    </div>
+                </div>
+                
+                <div class="frequency-item">
+                    <div class="frequency-card">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z"/>
+                        </svg>
+                    </div>
+                    <div class="frequency-info">
+                        <div class="frequency-name">Колесо Фортуны</div>
+                        <div class="frequency-count">Появляется в 4 раскладах</div>
+                    </div>
+                    <div class="frequency-bar">
+                        <div class="frequency-progress" style="width: 55%;"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Insights section -->
+        <section class="insights-section animate-fadeInUp">
+            <h2 class="section-title">
+                <div class="section-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z"/>
+                    </svg>
+                </div>
+                ИИ-инсайты
+            </h2>
+            
+            <div class="insight-card">
+                <div class="insight-header">
+                    <div class="insight-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"/>
+                        </svg>
+                    </div>
+                    <h3 class="insight-title">Позитивная тенденция</h3>
+                </div>
+                <p class="insight-text">
+                    Ваши расклады показывают устойчивый рост позитивных карт. 
+                    Звезда и Влюбленные появляются чаще, что указывает на благоприятный период.
+                </p>
+            </div>
+            
+            <div class="insight-card">
+                <div class="insight-header">
+                    <div class="insight-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z"/>
+                        </svg>
+                    </div>
+                    <h3 class="insight-title">Рекомендация</h3>
+                </div>
+                <p class="insight-text">
+                    Попробуйте больше раскладов на тему карьеры. 
+                    Ваша активность в этой области может принести новые возможности.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom navigation -->
+    <nav class="bottom-nav">
+        <div class="nav-item" onclick="goToMain()">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M10 20V14H14V20H19V12H22L12 3L2 12H5V20H10Z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Главная</span>
+        </div>
+        <div class="nav-item" onclick="openDiary()">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V5H19V19ZM7 7H17V9H7V7ZM7 11H17V13H7V11ZM7 15H14V17H7V15Z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Дневник</span>
+        </div>
+        <div class="nav-item active">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M16 6L18.29 8.29L13.41 13.17L9.41 9.17L2 16.59L3.41 18L9.41 12L13.41 16L19.71 9.71L22 12V6H16Z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Аналитика</span>
+        </div>
+        <div class="nav-item" onclick="openProfile()">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Профиль</span>
+        </div>
+    </nav>
+
+    <script>
+        // Инициализация Telegram WebApp
+        const initTelegram = () => {
+            if (window.Telegram && window.Telegram.WebApp) {
+                Telegram.WebApp.ready();
+                Telegram.WebApp.expand();
+                
+                // Установка цветов темы
+                const theme = Telegram.WebApp.colorScheme;
+                if (theme === 'dark') {
+                    Telegram.WebApp.setHeaderColor('#1A1B2E');
+                    Telegram.WebApp.setBackgroundColor('#0A0B1A');
+                } else {
+                    Telegram.WebApp.setHeaderColor('#F8FAFC');
+                    Telegram.WebApp.setBackgroundColor('#FFFFFF');
+                }
+            }
+        };
+
+        // Функции аналитики
+        const exportData = () => {
+            console.log('Экспорт данных...');
+            // Подготовка данных для экспорта
+            const analyticsData = {
+                stats: {
+                    totalReadings: 24,
+                    averageScore: 4.8,
+                    streak: 7,
+                    accuracy: 85
+                },
+                charts: {
+                    weeklyActivity: [2, 3, 1, 4, 3, 3, 3],
+                    moodTrends: { excellent: 8, normal: 12, thinking: 3, sad: 1 },
+                    cardFrequency: [
+                        { name: 'Звезда', count: 6 },
+                        { name: 'Влюбленные', count: 5 },
+                        { name: 'Колесо Фортуны', count: 4 }
+                    ]
+                },
+                insights: [
+                    'Позитивная тенденция в раскладах',
+                    'Рекомендация попробовать карьерные расклады'
+                ]
+            };
+            
+            // В реальном приложении здесь будет экспорт в файл
+            console.log('Данные для экспорта:', analyticsData);
+        };
+
+        const goToMain = () => {
+            console.log('Переход к главному экрану...');
+        };
+
+        const openDiary = () => {
+            console.log('Открытие дневника...');
+        };
+
+        const openProfile = () => {
+            console.log('Открытие профиля...');
+        };
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            initTelegram();
+            
+            // Анимация появления элементов
+            const elements = document.querySelectorAll('.animate-fadeInUp');
+            elements.forEach((el, index) => {
+                el.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+
+        // Обработка изменения темы
+        if (window.Telegram && window.Telegram.WebApp) {
+            Telegram.WebApp.onEvent('themeChanged', () => {
+                const theme = Telegram.WebApp.colorScheme;
+                document.documentElement.setAttribute('data-theme', theme);
+            });
+        }
+    </script>
+</body>
+</html>

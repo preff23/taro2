@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Таработ - Главный экран</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0A0B1A;
+            --bg-secondary: #1A1B2E;
+            --bg-tertiary: #2A2B3E;
+            --accent-mystic: #6366F1;
+            --accent-lunar: #8B5CF6;
+            --accent-crystal: #06B6D4;
+            --accent-gold: #F59E0B;
+            --text-primary: #F8FAFC;
+            --text-secondary: #CBD5E1;
+            --text-tertiary: #94A3B8;
+            --gradient-mystic: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            --gradient-lunar: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+            --gradient-crystal: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%);
+            --glow-mystic: 0 0 20px rgba(99, 102, 241, 0.3);
+            --glow-lunar: 0 0 20px rgba(139, 92, 246, 0.3);
+            --glow-crystal: 0 0 20px rgba(6, 182, 212, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            padding: 20px;
+            padding-top: calc(env(safe-area-inset-top) + 20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-mystic);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--glow-mystic);
+        }
+
+        .logo-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient-mystic);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .profile-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* Main content */
+        .main-content {
+            padding: 20px;
+        }
+
+        /* Welcome section */
+        .welcome {
+            margin-bottom: 30px;
+        }
+
+        .welcome-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .welcome-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Quick actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .quick-action {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quick-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .quick-action.new-reading {
+            background: var(--gradient-mystic);
+            border: none;
+            box-shadow: var(--glow-mystic);
+        }
+
+        .quick-action.voice-reading {
+            background: var(--gradient-lunar);
+            border: none;
+            box-shadow: var(--glow-lunar);
+        }
+
+        .quick-action-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quick-action-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .quick-action-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .quick-action-subtitle {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        /* Themes carousel */
+        .themes-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .themes-carousel {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .themes-carousel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .theme-card {
+            min-width: 200px;
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-card.popular {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+        }
+
+        .theme-card.popular::before {
+            content: 'Популярное';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--accent-gold);
+            color: white;
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .theme-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-crystal);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            box-shadow: var(--glow-crystal);
+        }
+
+        .theme-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .theme-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .theme-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .theme-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+        }
+
+        /* Favorites section */
+        .favorites-section {
+            margin-bottom: 30px;
+        }
+
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .favorite-item {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .favorite-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .favorite-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-mystic);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+
+        .favorite-icon svg {
+            width: 16px;
+            height: 16px;
+            fill: white;
+        }
+
+        .favorite-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .favorite-date {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+        }
+
+        /* Bottom navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 20px;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom));
+            display: flex;
+            justify-content: space-around;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .nav-item.active {
+            color: var(--accent-mystic);
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .nav-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        .nav-label {
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 16px;
+            }
+            
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .favorites-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .theme-card {
+                min-width: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"/>
+                    </svg>
+                </div>
+                <span class="logo-text">Таработ</span>
+            </div>
+            <button class="profile-btn" onclick="openProfile()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="main-content">
+        <!-- Welcome section -->
+        <section class="welcome animate-fadeInUp">
+            <h1 class="welcome-title">Добро пожаловать в мир Таро</h1>
+            <p class="welcome-subtitle">Откройте тайны будущего с помощью ИИ-толкований</p>
+        </section>
+
+        <!-- Quick actions -->
+        <section class="quick-actions animate-fadeInUp">
+            <div class="quick-action new-reading" onclick="startNewReading()">
+                <div class="quick-action-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+                    </svg>
+                </div>
+                <h3 class="quick-action-title">Новый расклад</h3>
+                <p class="quick-action-subtitle">Быстрый доступ</p>
+            </div>
+            <div class="quick-action voice-reading" onclick="startVoiceReading()">
+                <div class="quick-action-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 14C13.66 14 15 12.66 15 11V5C15 3.34 13.66 2 12 2C10.34 2 9 3.34 9 5V11C9 12.66 10.34 14 12 14ZM19.1 11C19.1 7.93 16.97 5.4 14 5.04V7C16.24 7.4 17.9 9.02 17.9 11H19.1ZM14 17H10V15H14V17ZM12 20C8.69 20 6 17.31 6 14H8C8 16.21 9.79 18 12 18C14.21 18 16 16.21 16 14H18C18 17.31 15.31 20 12 20Z"/>
+                    </svg>
+                </div>
+                <h3 class="quick-action-title">Голосовой вопрос</h3>
+                <p class="quick-action-subtitle">PRO функция</p>
+            </div>
+        </section>
+
+        <!-- Themes carousel -->
+        <section class="themes-section animate-fadeInUp">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                    <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"/>
+                </svg>
+                Популярные темы
+            </h2>
+            <div class="themes-carousel">
+                <div class="theme-card popular" onclick="selectTheme('love')">
+                    <div class="theme-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z"/>
+                        </svg>
+                    </div>
+                    <h3 class="theme-title">Любовь и отношения</h3>
+                    <p class="theme-description">Расклад на отношения и будущее в любви</p>
+                    <div class="theme-stats">
+                        <span>⭐ 4.9</span>
+                        <span>1.2k использований</span>
+                    </div>
+                </div>
+                
+                <div class="theme-card" onclick="selectTheme('career')">
+                    <div class="theme-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2L2 7L12 12L22 7L12 2ZM2 17L12 22L22 17M2 12L12 17L22 12"/>
+                        </svg>
+                    </div>
+                    <h3 class="theme-title">Карьера и работа</h3>
+                    <p class="theme-description">Профессиональный рост и возможности</p>
+                    <div class="theme-stats">
+                        <span>⭐ 4.8</span>
+                        <span>890 использований</span>
+                    </div>
+                </div>
+                
+                <div class="theme-card" onclick="selectTheme('future')">
+                    <div class="theme-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z"/>
+                        </svg>
+                    </div>
+                    <h3 class="theme-title">Будущее и судьба</h3>
+                    <p class="theme-description">Общий прогноз на ближайшее время</p>
+                    <div class="theme-stats">
+                        <span>⭐ 4.7</span>
+                        <span>1.5k использований</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Favorites section -->
+        <section class="favorites-section animate-fadeInUp">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z"/>
+                </svg>
+                Избранные расклады
+            </h2>
+            <div class="favorites-grid">
+                <div class="favorite-item" onclick="openFavorite('daily')">
+                    <div class="favorite-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V5H19V19ZM7 7H17V9H7V7ZM7 11H17V13H7V11ZM7 15H14V17H7V15Z"/>
+                        </svg>
+                    </div>
+                    <h3 class="favorite-title">Ежедневный расклад</h3>
+                    <p class="favorite-date">Сегодня, 14:30</p>
+                </div>
+                
+                <div class="favorite-item" onclick="openFavorite('love')">
+                    <div class="favorite-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z"/>
+                        </svg>
+                    </div>
+                    <h3 class="favorite-title">Любовный расклад</h3>
+                    <p class="favorite-date">Вчера, 20:15</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom navigation -->
+    <nav class="bottom-nav">
+        <div class="nav-item active">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M10 20V14H14V20H19V12H22L12 3L2 12H5V20H10Z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Главная</span>
+        </div>
+        <div class="nav-item" onclick="openDiary()">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V5H19V19ZM7 7H17V9H7V7ZM7 11H17V13H7V11ZM7 15H14V17H7V15Z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Дневник</span>
+        </div>
+        <div class="nav-item" onclick="openAnalytics()">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M16 6L18.29 8.29L13.41 13.17L9.41 9.17L2 16.59L3.41 18L9.41 12L13.41 16L19.71 9.71L22 12V6H16Z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Аналитика</span>
+        </div>
+        <div class="nav-item" onclick="openProfile()">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Профиль</span>
+        </div>
+    </nav>
+
+    <script>
+        // Инициализация Telegram WebApp
+        const initTelegram = () => {
+            if (window.Telegram && window.Telegram.WebApp) {
+                Telegram.WebApp.ready();
+                Telegram.WebApp.expand();
+                
+                // Установка цветов темы
+                const theme = Telegram.WebApp.colorScheme;
+                if (theme === 'dark') {
+                    Telegram.WebApp.setHeaderColor('#1A1B2E');
+                    Telegram.WebApp.setBackgroundColor('#0A0B1A');
+                } else {
+                    Telegram.WebApp.setHeaderColor('#F8FAFC');
+                    Telegram.WebApp.setBackgroundColor('#FFFFFF');
+                }
+            }
+        };
+
+        // Функции навигации
+        const startNewReading = () => {
+            console.log('Начало нового расклада...');
+            // Переход к экрану выбора темы
+        };
+
+        const startVoiceReading = () => {
+            console.log('Голосовой вопрос...');
+            // Проверка PRO статуса и переход к голосовому интерфейсу
+        };
+
+        const selectTheme = (theme) => {
+            console.log('Выбрана тема:', theme);
+            // Переход к экрану расклада с выбранной темой
+        };
+
+        const openFavorite = (favorite) => {
+            console.log('Открыт избранный расклад:', favorite);
+            // Переход к просмотру избранного расклада
+        };
+
+        const openDiary = () => {
+            console.log('Открытие дневника...');
+            // Переход к экрану дневника
+        };
+
+        const openAnalytics = () => {
+            console.log('Открытие аналитики...');
+            // Переход к экрану аналитики
+        };
+
+        const openProfile = () => {
+            console.log('Открытие профиля...');
+            // Переход к экрану профиля
+        };
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            initTelegram();
+            
+            // Анимация появления элементов
+            const elements = document.querySelectorAll('.animate-fadeInUp');
+            elements.forEach((el, index) => {
+                el.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+
+        // Обработка изменения темы
+        if (window.Telegram && window.Telegram.WebApp) {
+            Telegram.WebApp.onEvent('themeChanged', () => {
+                const theme = Telegram.WebApp.colorScheme;
+                document.documentElement.setAttribute('data-theme', theme);
+            });
+        }
+    </script>
+</body>
+</html>

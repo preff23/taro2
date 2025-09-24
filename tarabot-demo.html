@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarabot - Full Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0A0A1A 0%, #1A0A2A 50%, #0A0A1A 100%);
+            color: #E0E0E0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            background: linear-gradient(45deg, #9C27B0, #00BCD4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #B0B0B0;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .demo-card {
+            background: linear-gradient(145deg, #1A0A2A, #0A0A1A);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(156, 39, 176, 0.4);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .demo-card h3 {
+            color: #00BCD4;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .demo-card p {
+            color: #B0B0B0;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #9C27B0, #673AB7);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(156, 39, 176, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .response {
+            background: #0A0A1A;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .success {
+            border-color: #4CAF50;
+        }
+
+        .error {
+            border-color: #F44336;
+        }
+
+        .loading {
+            color: #FFC107;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .status-online {
+            background: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .status-offline {
+            background: #F44336;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            color: #B0B0B0;
+        }
+
+        .feature-list li::before {
+            content: "✅ ";
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .api-endpoints {
+            background: rgba(156, 39, 176, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .endpoint {
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.5rem;
+            border-radius: 5px;
+            margin: 0.5rem 0;
+            color: #00BCD4;
+        }
+
+        .method {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .path {
+            color: #FFC107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔮 Tarabot Full Demo</h1>
+            <p>Complete demonstration of all Tarabot features and API endpoints</p>
+        </div>
+
+        <div class="demo-grid">
+            <!-- Server Status -->
+            <div class="demo-card">
+                <h3>📊 Server Status</h3>
+                <p>Check if the Tarabot backend is running and healthy.</p>
+                <button class="btn" onclick="checkServerStatus()">Check Status</button>
+                <div id="status-response" class="response" style="display: none;"></div>
+            </div>
+
+            <!-- Authentication -->
+            <div class="demo-card">
+                <h3>🔐 Authentication</h3>
+                <p>Test Telegram WebApp authentication flow with mock data.</p>
+                <button class="btn" onclick="testAuthentication()">Authenticate User</button>
+                <div id="auth-response" class="response" style="display: none;"></div>
+            </div>
+
+            <!-- Tarot Reading -->
+            <div class="demo-card">
+                <h3>🔮 Tarot Reading</h3>
+                <p>Create a new tarot reading with different themes and layouts.</p>
+                <button class="btn" onclick="createTarotReading()">Create Reading</button>
+                <button class="btn" onclick="createLoveReading()">Love Reading</button>
+                <button class="btn" onclick="createCareerReading()">Career Reading</button>
+                <div id="reading-response" class="response" style="display: none;"></div>
+            </div>
+
+            <!-- AI Interpretation -->
+            <div class="demo-card">
+                <h3>🤖 AI Interpretation</h3>
+                <p>Generate AI-powered interpretations for tarot readings.</p>
+                <button class="btn" onclick="generateInterpretation()">Generate AI Reading</button>
+                <div id="ai-response" class="response" style="display: none;"></div>
+            </div>
+
+            <!-- Payment System -->
+            <div class="demo-card">
+                <h3>💰 Payment System</h3>
+                <p>Test Telegram Stars payment integration for subscriptions.</p>
+                <button class="btn" onclick="createProInvoice()">PRO Subscription</button>
+                <button class="btn" onclick="createVipInvoice()">VIP Subscription</button>
+                <button class="btn" onclick="createOneOffInvoice()">One-off Purchase</button>
+                <div id="payment-response" class="response" style="display: none;"></div>
+            </div>
+
+            <!-- Diary System -->
+            <div class="demo-card">
+                <h3>📖 Diary System</h3>
+                <p>Manage tarot diary entries and mood tracking.</p>
+                <button class="btn" onclick="getDiaryEntries()">Get Diary</button>
+                <button class="btn" onclick="addDiaryEntry()">Add Entry</button>
+                <div id="diary-response" class="response" style="display: none;"></div>
+            </div>
+
+            <!-- User Profile -->
+            <div class="demo-card">
+                <h3>👤 User Profile</h3>
+                <p>View user profile information and statistics.</p>
+                <button class="btn" onclick="getUserProfile()">Get Profile</button>
+                <button class="btn" onclick="getUserEntitlements()">Get Entitlements</button>
+                <div id="profile-response" class="response" style="display: none;"></div>
+            </div>
+
+            <!-- API Documentation -->
+            <div class="demo-card">
+                <h3>📚 API Documentation</h3>
+                <p>All available API endpoints and their usage.</p>
+                <div class="api-endpoints">
+                    <div class="endpoint"><span class="method">GET</span> <span class="path">/health</span> - Server health check</div>
+                    <div class="endpoint"><span class="method">POST</span> <span class="path">/auth/telegram</span> - Telegram authentication</div>
+                    <div class="endpoint"><span class="method">POST</span> <span class="path">/readings</span> - Create tarot reading</div>
+                    <div class="endpoint"><span class="method">POST</span> <span class="path">/ai/interpret</span> - Generate AI interpretation</div>
+                    <div class="endpoint"><span class="method">POST</span> <span class="path">/payments/stars/invoice</span> - Create payment invoice</div>
+                    <div class="endpoint"><span class="method">GET</span> <span class="path">/diary</span> - Get diary entries</div>
+                    <div class="endpoint"><span class="method">GET</span> <span class="path">/users/me</span> - Get user profile</div>
+                </div>
+            </div>
+
+            <!-- Features Overview -->
+            <div class="demo-card">
+                <h3>✨ Features Overview</h3>
+                <p>Complete list of implemented features:</p>
+                <ul class="feature-list">
+                    <li>Telegram WebApp Authentication</li>
+                    <li>78 Tarot Cards Database</li>
+                    <li>Multiple Reading Layouts (1, 3, 5 cards)</li>
+                    <li>AI-Powered Interpretations</li>
+                    <li>Telegram Stars Payments</li>
+                    <li>Subscription Management</li>
+                    <li>Diary & Mood Tracking</li>
+                    <li>User Profiles & Statistics</li>
+                    <li>Referral System</li>
+                    <li>Admin Panel</li>
+                    <li>Rate Limiting & Security</li>
+                    <li>Docker Support</li>
+                    <li>CI/CD Pipeline</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080';
+
+        async function checkServerStatus() {
+            const responseDiv = document.getElementById('status-response');
+            responseDiv.style.display = 'block';
+            responseDiv.className = 'response loading';
+            responseDiv.textContent = 'Checking server status...';
+
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                responseDiv.className = 'response success';
+                responseDiv.innerHTML = `
+<span class="status-indicator status-online"></span>Server is online and healthy!
+
+Status: ${data.status}
+Uptime: ${Math.round(data.uptime)} seconds
+Message: ${data.message}
+Timestamp: ${new Date(data.timestamp).toLocaleString()}
+                `;
+            } catch (error) {
+                responseDiv.className = 'response error';
+                responseDiv.innerHTML = `
+<span class="status-indicator status-offline"></span>Server is offline or unreachable!
+
+Error: ${error.message}
+Make sure the backend is running on port 8080
+                `;
+            }
+        }
+
+        async function testAuthentication() {
+            const responseDiv = document.getElementById('auth-response');
+            responseDiv.style.display = 'block';
+            responseDiv.className = 'response loading';
+            responseDiv.textContent = 'Testing authentication...';
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/telegram`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        initData: 'demo_telegram_init_data'
+                    })
+                });
+
+                const data = await response.json();
+                responseDiv.className = 'response success';
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function createTarotReading() {
+            await createReading('general', '3');
+        }
+
+        async function createLoveReading() {
+            await createReading('love', '3');
+        }
+
+        async function createCareerReading() {
+            await createReading('career', '5');
+        }
+
+        async function createReading(theme, layout) {
+            const responseDiv = document.getElementById('reading-response');
+            responseDiv.style.display = 'block';
+            responseDiv.className = 'response loading';
+            responseDiv.textContent = `Creating ${theme} reading with ${layout} cards...`;
+
+            try {
+                const response = await fetch(`${API_BASE}/readings`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        theme,
+                        layout
+                    })
+                });
+
+                const data = await response.json();
+                responseDiv.className = 'response success';
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function generateInterpretation() {
+            const responseDiv = document.getElementById('ai-response');
+            responseDiv.style.display = 'block';
+            responseDiv.className = 'response loading';
+            responseDiv.textContent = 'Generating AI interpretation...';
+
+            try {
+                const response = await fetch(`${API_BASE}/ai/interpret`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        readingId: 'reading_123',
+                        context: 'Tell me about my future and what I should focus on'
+                    })
+                });
+
+                const data = await response.json();
+                responseDiv.className = 'response success';
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function createProInvoice() {
+            await createInvoice('SUBSCRIPTION', 'PRO_30D');
+        }
+
+        async function createVipInvoice() {
+            await createInvoice('SUBSCRIPTION', 'VIP_30D');
+        }
+
+        async function createOneOffInvoice() {
+            await createInvoice('ONE_OFF', null, 'DEEP_READ');
+        }
+
+        async function createInvoice(kind, plan, sku) {
+            const responseDiv = document.getElementById('payment-response');
+            responseDiv.style.display = 'block';
+            responseDiv.className = 'response loading';
+            responseDiv.textContent = 'Creating payment invoice...';
+
+            try {
+                const response = await fetch(`${API_BASE}/payments/stars/invoice`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        kind,
+                        plan,
+                        sku
+                    })
+                });
+
+                const data = await response.json();
+                responseDiv.className = 'response success';
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function getDiaryEntries() {
+            const responseDiv = document.getElementById('diary-response');
+            responseDiv.style.display = 'block';
+            responseDiv.className = 'response loading';
+            responseDiv.textContent = 'Getting diary entries...';
+
+            try {
+                const response = await fetch(`${API_BASE}/diary`);
+                const data = await response.json();
+                responseDiv.className = 'response success';
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function addDiaryEntry() {
+            const responseDiv = document.getElementById('diary-response');
+            responseDiv.style.display = 'block';
+            responseDiv.className = 'response loading';
+            responseDiv.textContent = 'Adding diary entry...';
+
+            try {
+                const response = await fetch(`${API_BASE}/diary`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        mood: 'GOOD',
+                        notes: 'Feeling optimistic about the future after my tarot reading'
+                    })
+                });
+
+                const data = await response.json();
+                responseDiv.className = 'response success';
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function getUserProfile() {
+            const responseDiv = document.getElementById('profile-response');
+            responseDiv.style.display = 'block';
+            responseDiv.className = 'response loading';
+            responseDiv.textContent = 'Getting user profile...';
+
+            try {
+                const response = await fetch(`${API_BASE}/users/me`);
+                const data = await response.json();
+                responseDiv.className = 'response success';
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function getUserEntitlements() {
+            const responseDiv = document.getElementById('profile-response');
+            responseDiv.style.display = 'block';
+            responseDiv.className = 'response loading';
+            responseDiv.textContent = 'Getting user entitlements...';
+
+            try {
+                const response = await fetch(`${API_BASE}/users/me/entitlements`);
+                const data = await response.json();
+                responseDiv.className = 'response success';
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        // Auto-check server status on load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkServerStatus();
+        });
+    </script>
+</body>
+</html>

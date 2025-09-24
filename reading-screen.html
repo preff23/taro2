@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Таработ - Расклад</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0A0B1A;
+            --bg-secondary: #1A1B2E;
+            --bg-tertiary: #2A2B3E;
+            --accent-mystic: #6366F1;
+            --accent-lunar: #8B5CF6;
+            --accent-crystal: #06B6D4;
+            --accent-gold: #F59E0B;
+            --text-primary: #F8FAFC;
+            --text-secondary: #CBD5E1;
+            --text-tertiary: #94A3B8;
+            --gradient-mystic: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            --gradient-lunar: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+            --gradient-crystal: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%);
+            --glow-mystic: 0 0 20px rgba(99, 102, 241, 0.3);
+            --glow-lunar: 0 0 20px rgba(139, 92, 246, 0.3);
+            --glow-crystal: 0 0 20px rgba(6, 182, 212, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            padding: 20px;
+            padding-top: calc(env(safe-area-inset-top) + 20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .back-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            flex: 1;
+        }
+
+        .share-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .share-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .share-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* Main content */
+        .main-content {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Reading info */
+        .reading-info {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .reading-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: var(--gradient-mystic);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .reading-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 16px;
+        }
+
+        .reading-date {
+            color: var(--text-tertiary);
+            font-size: 0.9rem;
+        }
+
+        /* Cards layout */
+        .cards-container {
+            margin-bottom: 30px;
+        }
+
+        .cards-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .card.reversed {
+            transform: rotate(180deg);
+        }
+
+        .card.reversed:hover {
+            transform: rotate(180deg) translateY(-4px);
+        }
+
+        .card-image {
+            width: 80px;
+            height: 120px;
+            background: var(--gradient-mystic);
+            border-radius: 12px;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--glow-mystic);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .card-image svg {
+            width: 40px;
+            height: 40px;
+            fill: white;
+            z-index: 1;
+        }
+
+        .card-name {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .card-position {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+            margin-bottom: 8px;
+        }
+
+        .card-meaning {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* AI Interpretation */
+        .interpretation {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+
+        .interpretation-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .interpretation-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-crystal);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--glow-crystal);
+        }
+
+        .interpretation-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        .interpretation-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .interpretation-text {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .interpretation-pro {
+            background: var(--gradient-mystic);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .interpretation-pro:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--glow-mystic);
+        }
+
+        .interpretation-pro-text {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .interpretation-pro-subtitle {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        /* Action buttons */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .action-btn {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-btn.primary {
+            background: var(--gradient-mystic);
+            border: none;
+            box-shadow: var(--glow-mystic);
+        }
+
+        .action-btn.secondary {
+            background: var(--gradient-lunar);
+            border: none;
+            box-shadow: var(--glow-lunar);
+        }
+
+        .action-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        /* Gift section */
+        .gift-section {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .gift-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-crystal);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            box-shadow: var(--glow-crystal);
+        }
+
+        .gift-icon svg {
+            width: 30px;
+            height: 30px;
+            fill: white;
+        }
+
+        .gift-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .gift-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+        }
+
+        .gift-btn {
+            background: var(--gradient-crystal);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .gift-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--glow-crystal);
+        }
+
+        /* Bottom navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 20px;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom));
+            display: flex;
+            justify-content: space-around;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .nav-item.active {
+            color: var(--accent-mystic);
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .nav-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        .nav-label {
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes cardFlip {
+            0% { transform: rotateY(0deg); }
+            50% { transform: rotateY(90deg); }
+            100% { transform: rotateY(0deg); }
+        }
+
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .animate-cardFlip {
+            animation: cardFlip 0.8s ease-in-out;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 16px;
+            }
+            
+            .cards-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <button class="back-btn" onclick="goBack()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20 11H7.83L13.42 5.41L12 4L4 12L12 20L13.41 18.59L7.83 13H20V11Z"/>
+                </svg>
+            </button>
+            <h1 class="header-title">Расклад</h1>
+            <button class="share-btn" onclick="shareReading()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M18 16.08C17.24 16.08 16.56 16.38 16.04 16.85L8.91 12.7C8.96 12.47 9 12.24 9 12S8.96 11.53 8.91 11.3L15.96 7.19C16.5 7.69 17.21 8 18 8C19.66 8 21 6.66 21 5S19.66 2 18 2 15 3.34 15 5C15 5.24 15.04 5.47 15.09 5.7L8.04 9.81C7.5 9.31 6.79 9 6 9C4.34 9 3 10.34 3 12S4.34 15 6 15C6.79 15 7.5 14.69 8.04 14.19L15.16 18.34C15.11 18.55 15.08 18.77 15.08 19C15.08 20.61 16.39 21.92 18 21.92S20.92 20.61 20.92 19C20.92 17.39 19.61 16.08 18 16.08Z"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="main-content">
+        <!-- Reading info -->
+        <section class="reading-info animate-fadeInUp">
+            <h1 class="reading-title">Любовь и отношения</h1>
+            <p class="reading-subtitle">Расклад на будущее в любви</p>
+            <p class="reading-date">Сегодня, 14:30</p>
+        </section>
+
+        <!-- Cards layout -->
+        <section class="cards-container animate-fadeInUp">
+            <div class="cards-layout">
+                <div class="card" onclick="flipCard(this)">
+                    <div class="card-image">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z"/>
+                        </svg>
+                    </div>
+                    <h3 class="card-name">Влюбленные</h3>
+                    <p class="card-position">Прошлое</p>
+                    <p class="card-meaning">Гармония в отношениях, взаимная любовь</p>
+                </div>
+                
+                <div class="card" onclick="flipCard(this)">
+                    <div class="card-image">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z"/>
+                        </svg>
+                    </div>
+                    <h3 class="card-name">Колесо Фортуны</h3>
+                    <p class="card-position">Настоящее</p>
+                    <p class="card-meaning">Перемены к лучшему, новые возможности</p>
+                </div>
+                
+                <div class="card" onclick="flipCard(this)">
+                    <div class="card-image">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"/>
+                        </svg>
+                    </div>
+                    <h3 class="card-name">Звезда</h3>
+                    <p class="card-position">Будущее</p>
+                    <p class="card-meaning">Надежда, вдохновение, духовное развитие</p>
+                </div>
+                
+                <div class="card reversed" onclick="flipCard(this)">
+                    <div class="card-image">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V5H19V19ZM7 7H17V9H7V7ZM7 11H17V13H7V11ZM7 15H14V17H7V15Z"/>
+                        </svg>
+                    </div>
+                    <h3 class="card-name">Императрица</h3>
+                    <p class="card-position">Совет</p>
+                    <p class="card-meaning">Творчество, плодородие, материнство</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Interpretation -->
+        <section class="interpretation animate-fadeInUp">
+            <div class="interpretation-header">
+                <div class="interpretation-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z"/>
+                    </svg>
+                </div>
+                <h2 class="interpretation-title">ИИ-толкование</h2>
+            </div>
+            <p class="interpretation-text">
+                Ваш расклад показывает путь от гармоничных отношений в прошлом к новым возможностям в настоящем. 
+                Колесо Фортуны указывает на благоприятные перемены, а Звезда в будущем обещает надежду и вдохновение. 
+                Императрица советует развивать творческие способности и открытость.
+            </p>
+            <div class="interpretation-pro" onclick="openProInterpretation()">
+                <p class="interpretation-pro-text">Получить подробное толкование</p>
+                <p class="interpretation-pro-subtitle">PRO функция • 50 Stars</p>
+            </div>
+        </section>
+
+        <!-- Action buttons -->
+        <section class="action-buttons animate-fadeInUp">
+            <button class="action-btn primary" onclick="saveReading()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M17 3H5C3.89 3 3 3.9 3 5V19C3 20.1 3.89 21 5 21H19C20.1 21 21 20.1 21 19V7L17 3ZM19 19H5V5H16.17L19 7.83V19ZM12 12C10.34 12 9 10.66 9 9S10.34 6 12 6 15 7.34 15 9 13.66 12 12 12ZM6 18H18V16C18 13.79 14.21 12 12 12S6 13.79 6 16V18Z"/>
+                </svg>
+                Сохранить
+            </button>
+            <button class="action-btn secondary" onclick="shareReading()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M18 16.08C17.24 16.08 16.56 16.38 16.04 16.85L8.91 12.7C8.96 12.47 9 12.24 9 12S8.96 11.53 8.91 11.3L15.96 7.19C16.5 7.69 17.21 8 18 8C19.66 8 21 6.66 21 5S19.66 2 18 2 15 3.34 15 5C15 5.24 15.04 5.47 15.09 5.7L8.04 9.81C7.5 9.31 6.79 9 6 9C4.34 9 3 10.34 3 12S4.34 15 6 15C6.79 15 7.5 14.69 8.04 14.19L15.16 18.34C15.11 18.55 15.08 18.77 15.08 19C15.08 20.61 16.39 21.92 18 21.92S20.92 20.61 20.92 19C20.92 17.39 19.61 16.08 18 16.08Z"/>
+                </svg>
+                Поделиться
+            </button>
+        </section>
+
+        <!-- Gift section -->
+        <section class="gift-section animate-fadeInUp">
+            <div class="gift-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20 6H17.82C17.93 5.71 18 5.36 18 5C18 3.34 16.66 2 15 2C13.95 2 13.04 2.54 12.5 3.35L12 4.02L11.5 3.34C10.96 2.54 10.05 2 9 2C7.34 2 6 3.34 6 5C6 5.36 6.07 5.71 6.18 6H4C2.9 6 2 6.9 2 8V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V8C22 6.9 21.1 6 20 6ZM15 4C15.55 4 16 4.45 16 5S15.55 6 15 6 14 5.55 14 5 14.45 4 15 4ZM9 4C9.55 4 10 4.45 10 5S9.55 6 9 6 8 5.55 8 5 8.45 4 9 4ZM20 19H4V8H20V19Z"/>
+                </svg>
+            </div>
+            <h3 class="gift-title">Подарить расклад</h3>
+            <p class="gift-description">Отправьте этот расклад другу как подарок</p>
+            <button class="gift-btn" onclick="giftReading()">Подарить за 25 Stars</button>
+        </section>
+    </main>
+
+    <!-- Bottom navigation -->
+    <nav class="bottom-nav">
+        <div class="nav-item" onclick="goToMain()">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M10 20V14H14V20H19V12H22L12 3L2 12H5V20H10Z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Главная</span>
+        </div>
+        <div class="nav-item" onclick="openDiary()">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V5H19V19ZM7 7H17V9H7V7ZM7 11H17V13H7V11ZM7 15H14V17H7V15Z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Дневник</span>
+        </div>
+        <div class="nav-item" onclick="openAnalytics()">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M16 6L18.29 8.29L13.41 13.17L9.41 9.17L2 16.59L3.41 18L9.41 12L13.41 16L19.71 9.71L22 12V6H16Z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Аналитика</span>
+        </div>
+        <div class="nav-item" onclick="openProfile()">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Профиль</span>
+        </div>
+    </nav>
+
+    <script>
+        // Инициализация Telegram WebApp
+        const initTelegram = () => {
+            if (window.Telegram && window.Telegram.WebApp) {
+                Telegram.WebApp.ready();
+                Telegram.WebApp.expand();
+                
+                // Установка цветов темы
+                const theme = Telegram.WebApp.colorScheme;
+                if (theme === 'dark') {
+                    Telegram.WebApp.setHeaderColor('#1A1B2E');
+                    Telegram.WebApp.setBackgroundColor('#0A0B1A');
+                } else {
+                    Telegram.WebApp.setHeaderColor('#F8FAFC');
+                    Telegram.WebApp.setBackgroundColor('#FFFFFF');
+                }
+            }
+        };
+
+        // Функции взаимодействия
+        const flipCard = (cardElement) => {
+            cardElement.classList.add('animate-cardFlip');
+            setTimeout(() => {
+                cardElement.classList.remove('animate-cardFlip');
+            }, 800);
+        };
+
+        const goBack = () => {
+            console.log('Возврат к предыдущему экрану...');
+            // В реальном приложении здесь будет навигация назад
+        };
+
+        const shareReading = () => {
+            console.log('Поделиться раскладом...');
+            // Подготовка данных для шэринга
+            const shareData = {
+                title: 'Мой расклад Таро',
+                text: 'Посмотрите на мой расклад Таро в приложении Таработ!',
+                url: 'https://t.me/tarobot_app'
+            };
+            
+            if (window.Telegram && window.Telegram.WebApp) {
+                Telegram.WebApp.openLink(shareData.url);
+            }
+        };
+
+        const saveReading = () => {
+            console.log('Сохранение расклада...');
+            // Сохранение в дневник
+        };
+
+        const openProInterpretation = () => {
+            console.log('Открытие PRO толкования...');
+            // Проверка статуса подписки и переход к оплате
+        };
+
+        const giftReading = () => {
+            console.log('Подарок расклада...');
+            // Открытие модального окна для выбора получателя
+        };
+
+        const goToMain = () => {
+            console.log('Переход к главному экрану...');
+        };
+
+        const openDiary = () => {
+            console.log('Открытие дневника...');
+        };
+
+        const openAnalytics = () => {
+            console.log('Открытие аналитики...');
+        };
+
+        const openProfile = () => {
+            console.log('Открытие профиля...');
+        };
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            initTelegram();
+            
+            // Анимация появления элементов
+            const elements = document.querySelectorAll('.animate-fadeInUp');
+            elements.forEach((el, index) => {
+                el.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+
+        // Обработка изменения темы
+        if (window.Telegram && window.Telegram.WebApp) {
+            Telegram.WebApp.onEvent('themeChanged', () => {
+                const theme = Telegram.WebApp.colorScheme;
+                document.documentElement.setAttribute('data-theme', theme);
+            });
+        }
+    </script>
+</body>
+</html>
