@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Таработ - Полное приложение</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0A0B1A;
+            --bg-secondary: #1A1B2E;
+            --bg-tertiary: #2A2B3E;
+            --accent-mystic: #6366F1;
+            --accent-lunar: #8B5CF6;
+            --accent-crystal: #06B6D4;
+            --accent-gold: #F59E0B;
+            --text-primary: #F8FAFC;
+            --text-secondary: #CBD5E1;
+            --text-tertiary: #94A3B8;
+            --gradient-mystic: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            --gradient-lunar: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+            --gradient-crystal: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%);
+            --glow-mystic: 0 0 20px rgba(99, 102, 241, 0.3);
+            --glow-lunar: 0 0 20px rgba(139, 92, 246, 0.3);
+            --glow-crystal: 0 0 20px rgba(6, 182, 212, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* App Container */
+        .app-container {
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Screen Management */
+        .screen {
+            display: none;
+            min-height: 100vh;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            padding: 20px;
+            padding-top: calc(env(safe-area-inset-top) + 20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-mystic);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .subscription-badge {
+            background: var(--gradient-lunar);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--gradient-crystal);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 80px;
+            z-index: 99;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 16px;
+            text-align: center;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-tab.active {
+            color: var(--accent-mystic);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gradient-mystic);
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-bottom: 100px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--glow-mystic);
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--gradient-mystic);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--glow-mystic);
+        }
+
+        .btn-secondary {
+            background: var(--gradient-lunar);
+        }
+
+        .btn-crystal {
+            background: var(--gradient-crystal);
+        }
+
+        .btn-large {
+            padding: 16px 32px;
+            font-size: 18px;
+        }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid var(--accent-mystic);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 0 16px;
+            }
+            
+            .main-content {
+                padding: 16px;
+            }
+            
+            .nav-tab {
+                padding: 12px 8px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">🔮</div>
+                    <span>Таработ</span>
+                </div>
+                <div class="user-info">
+                    <span class="subscription-badge" id="subscription-badge">FREE</span>
+                    <div class="user-avatar" id="user-avatar">👤</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" data-screen="home">🏠 Главная</button>
+            <button class="nav-tab" data-screen="readings">🔮 Расклады</button>
+            <button class="nav-tab" data-screen="diary">📔 Дневник</button>
+            <button class="nav-tab" data-screen="profile">👤 Профиль</button>
+            <button class="nav-tab" data-screen="wow">✨ Вау-фичи</button>
+        </nav>
+
+        <!-- Screens -->
+        <div class="main-content">
+            <!-- Home Screen -->
+            <div class="screen active" id="home-screen">
+                <div class="card">
+                    <h2 style="color: var(--accent-mystic); margin-bottom: 16px;">Добро пожаловать в Таработ</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 24px;">
+                        Откройте тайны будущего с помощью ИИ-интерпретации карт Таро. 
+                        Получите персональные инсайты и руководство через древнюю мудрость карт.
+                    </p>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn btn-large" onclick="showScreen('readings')">
+                            🔮 Новый расклад
+                        </button>
+                        <button class="btn btn-secondary" onclick="showScreen('diary')">
+                            📔 Мой дневник
+                        </button>
+                        <button class="btn btn-crystal" onclick="showScreen('wow')">
+                            ✨ Вау-фичи
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="color: var(--accent-lunar); margin-bottom: 16px;">Популярные темы</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                        <button class="btn btn-secondary" onclick="createReading('love')">
+                            💕 Любовь и отношения
+                        </button>
+                        <button class="btn btn-secondary" onclick="createReading('career')">
+                            💼 Карьера и работа
+                        </button>
+                        <button class="btn btn-secondary" onclick="createReading('money')">
+                            💰 Деньги и финансы
+                        </button>
+                        <button class="btn btn-secondary" onclick="createReading('spiritual')">
+                            🧘 Саморазвитие
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Readings Screen -->
+            <div class="screen" id="readings-screen">
+                <div class="card">
+                    <h2 style="color: var(--accent-mystic); margin-bottom: 16px;">Создать расклад</h2>
+                    <form id="reading-form">
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; color: var(--text-secondary); margin-bottom: 8px;">
+                                На что хотите получить совет?
+                            </label>
+                            <select id="theme-select" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--bg-tertiary); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-primary);">
+                                <option value="general">Общие жизненные вопросы</option>
+                                <option value="love">Любовь и отношения</option>
+                                <option value="career">Карьера и работа</option>
+                                <option value="money">Деньги и финансы</option>
+                                <option value="spiritual">Саморазвитие и духовность</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; color: var(--text-secondary); margin-bottom: 8px;">
+                                Выберите расклад:
+                            </label>
+                            <select id="layout-select" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--bg-tertiary); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-primary);">
+                                <option value="1">Одна карта - Быстрый ответ</option>
+                                <option value="3">Три карты - Прошлое, Настоящее, Будущее</option>
+                                <option value="5">Пять карт - Полный расклад</option>
+                                <option value="celtic">Кельтский крест</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 24px;">
+                            <label style="display: block; color: var(--text-secondary); margin-bottom: 8px;">
+                                Дополнительный контекст (необязательно):
+                            </label>
+                            <textarea id="context-input" placeholder="Расскажите больше о вашей ситуации..." style="width: 100%; padding: 12px; border-radius: 8px; background: var(--bg-tertiary); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-primary); min-height: 80px; resize: vertical;"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-large" style="width: 100%;">
+                            🔮 Получить расклад
+                        </button>
+                    </form>
+                </div>
+
+                <div class="card" id="reading-result" style="display: none;">
+                    <h3 style="color: var(--accent-lunar); margin-bottom: 16px;">Ваш расклад</h3>
+                    <div id="cards-container"></div>
+                    <div id="interpretation-container" style="margin-top: 24px;"></div>
+                </div>
+            </div>
+
+            <!-- Diary Screen -->
+            <div class="screen" id="diary-screen">
+                <div class="card">
+                    <h2 style="color: var(--accent-mystic); margin-bottom: 16px;">Дневник настроений</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 24px;">
+                        Отслеживайте свои эмоции и связывайте их с раскладами Таро.
+                    </p>
+                    <button class="btn btn-large" onclick="addDiaryEntry()">
+                        📝 Добавить запись
+                    </button>
+                </div>
+
+                <div class="card">
+                    <h3 style="color: var(--accent-lunar); margin-bottom: 16px;">Последние записи</h3>
+                    <div id="diary-entries">
+                        <p style="color: var(--text-tertiary); text-align: center; padding: 40px;">
+                            Пока нет записей. Добавьте первую запись в дневник!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Screen -->
+            <div class="screen" id="profile-screen">
+                <div class="card">
+                    <h2 style="color: var(--accent-mystic); margin-bottom: 16px;">Профиль пользователя</h2>
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+                        <div class="user-avatar" style="width: 60px; height: 60px; font-size: 24px;">👤</div>
+                        <div>
+                            <h3 style="color: var(--text-primary);">Demo User</h3>
+                            <p style="color: var(--text-secondary);">demo@example.com</p>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                        <button class="btn btn-secondary" onclick="showSubscription()">
+                            💎 Подписка PRO
+                        </button>
+                        <button class="btn btn-secondary" onclick="showReferrals()">
+                            👥 Рефералы
+                        </button>
+                        <button class="btn btn-secondary" onclick="showSettings()">
+                            ⚙️ Настройки
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="color: var(--accent-lunar); margin-bottom: 16px;">Статистика</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+                        <div style="text-align: center; padding: 16px; background: var(--bg-tertiary); border-radius: 12px;">
+                            <div style="font-size: 24px; color: var(--accent-mystic); font-weight: bold;">0</div>
+                            <div style="color: var(--text-secondary); font-size: 14px;">Раскладов</div>
+                        </div>
+                        <div style="text-align: center; padding: 16px; background: var(--bg-tertiary); border-radius: 12px;">
+                            <div style="font-size: 24px; color: var(--accent-lunar); font-weight: bold;">0</div>
+                            <div style="color: var(--text-secondary); font-size: 14px;">Записей в дневнике</div>
+                        </div>
+                        <div style="text-align: center; padding: 16px; background: var(--bg-tertiary); border-radius: 12px;">
+                            <div style="font-size: 24px; color: var(--accent-crystal); font-weight: bold;">FREE</div>
+                            <div style="color: var(--text-secondary); font-size: 14px;">Подписка</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wow Features Screen -->
+            <div class="screen" id="wow-screen">
+                <div class="card">
+                    <h2 style="color: var(--accent-mystic); margin-bottom: 16px;">Вау-фичи</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 24px;">
+                        Эксклюзивные функции для пользователей PRO и VIP.
+                    </p>
+                </div>
+
+                <div class="card">
+                    <h3 style="color: var(--accent-lunar); margin-bottom: 16px;">🎤 Голосовые запросы</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                        Задавайте вопросы голосом и получайте мгновенные ответы.
+                    </p>
+                    <button class="btn btn-secondary" onclick="startVoiceQuery()">
+                        🎤 Начать голосовой запрос
+                    </button>
+                </div>
+
+                <div class="card">
+                    <h3 style="color: var(--accent-lunar); margin-bottom: 16px;">📸 Фото-расклады</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                        Загрузите фото и получите интерпретацию через ИИ.
+                    </p>
+                    <button class="btn btn-secondary" onclick="uploadPhoto()">
+                        📸 Загрузить фото
+                    </button>
+                </div>
+
+                <div class="card">
+                    <h3 style="color: var(--accent-lunar); margin-bottom: 16px;">🎁 Подарочные чтения</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                        Отправьте расклад другу как подарок.
+                    </p>
+                    <button class="btn btn-secondary" onclick="sendGiftReading()">
+                        🎁 Отправить подарок
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        let currentScreen = 'home';
+        let currentUser = null;
+        let readings = [];
+        let diaryEntries = [];
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            setupEventListeners();
+        });
+
+        function initializeApp() {
+            // Initialize Telegram WebApp if available
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.expand();
+                
+                // Set theme colors
+                window.Telegram.WebApp.setHeaderColor('#1A1B2E');
+                window.Telegram.WebApp.setBackgroundColor('#0A0B1A');
+            }
+
+            // Load user data
+            loadUserData();
+        }
+
+        function setupEventListeners() {
+            // Navigation tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const screen = this.dataset.screen;
+                    showScreen(screen);
+                });
+            });
+
+            // Reading form
+            document.getElementById('reading-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                createReading();
+            });
+        }
+
+        function showScreen(screenName) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+
+            // Show target screen
+            document.getElementById(screenName + '-screen').classList.add('active');
+
+            // Update navigation
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-screen="${screenName}"]`).classList.add('active');
+
+            currentScreen = screenName;
+        }
+
+        async function createReading(theme = null) {
+            const form = document.getElementById('reading-form');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            
+            // Show loading
+            submitBtn.classList.add('loading');
+            submitBtn.innerHTML = '<div class="spinner"></div> Создание расклада...';
+
+            try {
+                const themeValue = theme || document.getElementById('theme-select').value;
+                const layout = document.getElementById('layout-select').value;
+                const context = document.getElementById('context-input').value;
+
+                // Call API
+                const response = await fetch('/api/readings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        theme: themeValue,
+                        layout: layout,
+                        context: context
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.ok) {
+                    displayReading(data.data);
+                    readings.push(data.data);
+                } else {
+                    throw new Error(data.error || 'Ошибка создания расклада');
+                }
+
+            } catch (error) {
+                alert('Ошибка: ' + error.message);
+            } finally {
+                // Hide loading
+                submitBtn.classList.remove('loading');
+                submitBtn.innerHTML = '🔮 Получить расклад';
+            }
+        }
+
+        function displayReading(reading) {
+            const resultCard = document.getElementById('reading-result');
+            const cardsContainer = document.getElementById('cards-container');
+            const interpretationContainer = document.getElementById('interpretation-container');
+
+            // Show result card
+            resultCard.style.display = 'block';
+
+            // Display cards
+            cardsContainer.innerHTML = '';
+            reading.cards.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.style.cssText = `
+                    display: inline-block;
+                    margin: 8px;
+                    padding: 16px;
+                    background: var(--bg-tertiary);
+                    border-radius: 12px;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    text-align: center;
+                    min-width: 120px;
+                `;
+                cardElement.innerHTML = `
+                    <div style="font-size: 24px; margin-bottom: 8px;">🃏</div>
+                    <div style="font-weight: bold; color: var(--text-primary);">${card.name}</div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">${card.position || `Позиция ${index + 1}`}</div>
+                    <div style="font-size: 10px; color: ${card.upright ? 'var(--accent-crystal)' : 'var(--accent-gold)'}; margin-top: 4px;">
+                        ${card.upright ? 'Прямая' : 'Перевернутая'}
+                    </div>
+                `;
+                cardsContainer.appendChild(cardElement);
+            });
+
+            // Display interpretation
+            if (reading.interpretation) {
+                interpretationContainer.innerHTML = `
+                    <h4 style="color: var(--accent-lunar); margin-bottom: 12px;">Интерпретация</h4>
+                    <div style="background: var(--bg-tertiary); padding: 16px; border-radius: 12px; color: var(--text-secondary); line-height: 1.6;">
+                        ${reading.interpretation.fullText}
+                    </div>
+                `;
+            }
+
+            // Scroll to result
+            resultCard.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function addDiaryEntry() {
+            const mood = prompt('Как вы себя чувствуете? (1-10):');
+            const notes = prompt('Дополнительные заметки:');
+            
+            if (mood) {
+                const entry = {
+                    id: Date.now(),
+                    date: new Date().toISOString(),
+                    mood: parseInt(mood),
+                    notes: notes || '',
+                    readingId: readings.length > 0 ? readings[readings.length - 1].id : null
+                };
+                
+                diaryEntries.push(entry);
+                updateDiaryDisplay();
+            }
+        }
+
+        function updateDiaryDisplay() {
+            const container = document.getElementById('diary-entries');
+            
+            if (diaryEntries.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-tertiary); text-align: center; padding: 40px;">Пока нет записей. Добавьте первую запись в дневник!</p>';
+                return;
+            }
+
+            container.innerHTML = diaryEntries.map(entry => `
+                <div style="padding: 16px; background: var(--bg-tertiary); border-radius: 12px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="color: var(--text-primary); font-weight: bold;">${new Date(entry.date).toLocaleDateString()}</span>
+                        <span style="color: var(--accent-mystic); font-weight: bold;">Настроение: ${entry.mood}/10</span>
+                    </div>
+                    ${entry.notes ? `<p style="color: var(--text-secondary);">${entry.notes}</p>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function showSubscription() {
+            alert('Функция подписки PRO/VIP будет доступна в полной версии!');
+        }
+
+        function showReferrals() {
+            alert('Реферальная система будет доступна в полной версии!');
+        }
+
+        function showSettings() {
+            alert('Настройки будут доступны в полной версии!');
+        }
+
+        function startVoiceQuery() {
+            alert('Голосовые запросы будут доступны в PRO версии!');
+        }
+
+        function uploadPhoto() {
+            alert('Фото-расклады будут доступны в PRO версии!');
+        }
+
+        function sendGiftReading() {
+            alert('Подарочные чтения будут доступны в VIP версии!');
+        }
+
+        function loadUserData() {
+            // Mock user data
+            currentUser = {
+                id: 'demo_user',
+                name: 'Demo User',
+                email: 'demo@example.com',
+                subscription: 'FREE'
+            };
+
+            // Update UI
+            document.getElementById('subscription-badge').textContent = currentUser.subscription;
+            document.getElementById('user-avatar').textContent = '👤';
+        }
+    </script>
+</body>
+</html>
