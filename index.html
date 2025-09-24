@@ -398,12 +398,12 @@
             const statusDiv = document.getElementById('server-status');
             
             try {
-                const response = await fetch(`${API_BASE}/api/health`);
+                const response = await fetch(`${API_BASE}/api/test`);
                 const data = await response.json();
                 
                 statusDiv.innerHTML = `
                     <span class="status-indicator status-online"></span>
-                    <span>Server is online and healthy! Status: ${data.data.status}</span>
+                    <span>Server is online! Message: ${data.message}</span>
                 `;
             } catch (error) {
                 statusDiv.innerHTML = `
