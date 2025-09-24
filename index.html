@@ -312,6 +312,7 @@
                     <li>Responsive design</li>
                 </ul>
                 <a href="tarabot-frontend.html" class="btn">🚀 Launch Main App</a>
+                <a href="status.html" class="btn btn-secondary">📊 Server Status</a>
             </div>
 
             <!-- API Demo -->
@@ -326,6 +327,7 @@
                     <li>Server status monitoring</li>
                 </ul>
                 <a href="api-test.html" class="btn btn-secondary">🧪 Test API</a>
+                <a href="direct-test.html" class="btn">🔍 Direct Test</a>
             </div>
 
             <!-- Backend Demo -->
@@ -338,7 +340,7 @@
                     <li>Simple response viewing</li>
                     <li>Quick functionality check</li>
                 </ul>
-                <a href="http://localhost:8080" class="btn">🔗 Backend API</a>
+                <a href="direct-test.html" class="btn">🔗 Direct API Test</a>
             </div>
 
             <!-- Documentation -->
@@ -417,6 +419,17 @@
         document.addEventListener('DOMContentLoaded', function() {
             checkServerStatus();
             setInterval(checkServerStatus, 30000);
+            
+            // Add click handlers to all buttons for debugging
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    console.log('Button clicked:', this.href);
+                    // Allow default behavior
+                });
+            });
+            
+            console.log('Page loaded, buttons:', buttons.length);
         });
     </script>
 </body>

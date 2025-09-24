@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarabot - Quick Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0A0A1A 0%, #1A0A2A 50%, #0A0A1A 100%);
+            color: #E0E0E0;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #9C27B0;
+            margin-bottom: 30px;
+            font-size: 3rem;
+            text-shadow: 0 0 20px rgba(156, 39, 176, 0.7);
+        }
+
+        .status {
+            background: linear-gradient(145deg, rgba(26, 10, 42, 0.9), rgba(10, 10, 26, 0.9));
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(156, 39, 176, 0.3);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-online {
+            background: #4CAF50;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.6);
+        }
+
+        .status-offline {
+            background: #F44336;
+            box-shadow: 0 0 15px rgba(244, 67, 54, 0.6);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #9C27B0, #673AB7);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(45deg, #673AB7, #9C27B0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #00BCD4, #0097A7);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(45deg, #0097A7, #00BCD4);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #4CAF50, #388E3C);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(45deg, #388E3C, #4CAF50);
+        }
+
+        .info {
+            background: rgba(0, 188, 212, 0.1);
+            border: 1px solid rgba(0, 188, 212, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .info h3 {
+            color: #00BCD4;
+            margin-bottom: 10px;
+        }
+
+        .info p {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔮 Tarabot Quick Test</h1>
+        
+        <div class="status">
+            <span class="status-indicator status-offline" id="status-indicator"></span>
+            <span id="status-text">Checking server status...</span>
+        </div>
+
+        <div class="buttons">
+            <a href="tarabot-frontend.html" class="btn">🚀 Main App</a>
+            <a href="direct-test.html" class="btn btn-secondary">🔍 API Test</a>
+            <a href="status.html" class="btn btn-success">📊 Status</a>
+            <a href="api-test.html" class="btn btn-secondary">🧪 Full Test</a>
+        </div>
+
+        <div class="info">
+            <h3>📋 Quick Links</h3>
+            <p><strong>Main App:</strong> Full Tarabot application with UI</p>
+            <p><strong>API Test:</strong> Direct API endpoint testing</p>
+            <p><strong>Status:</strong> Server health monitoring</p>
+            <p><strong>Full Test:</strong> Complete API testing suite</p>
+        </div>
+    </div>
+
+    <script>
+        async function checkStatus() {
+            const indicator = document.getElementById('status-indicator');
+            const text = document.getElementById('status-text');
+            
+            try {
+                const response = await fetch('/api/test');
+                const data = await response.json();
+                
+                if (data.success) {
+                    indicator.className = 'status-indicator status-online';
+                    text.textContent = 'Server is online! ✅';
+                } else {
+                    throw new Error('Server not responding correctly');
+                }
+            } catch (error) {
+                indicator.className = 'status-indicator status-offline';
+                text.textContent = 'Server is offline ❌';
+            }
+        }
+
+        // Check status on load
+        checkStatus();
+        
+        // Add click logging
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('btn')) {
+                console.log('Button clicked:', e.target.href);
+            }
+        });
+    </script>
+</body>
+</html>
