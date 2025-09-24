@@ -392,23 +392,23 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8080';
+        const API_BASE = window.location.origin;
 
         async function checkServerStatus() {
             const statusDiv = document.getElementById('server-status');
             
             try {
-                const response = await fetch(`${API_BASE}/health`);
+                const response = await fetch(`${API_BASE}/api/health`);
                 const data = await response.json();
                 
                 statusDiv.innerHTML = `
                     <span class="status-indicator status-online"></span>
-                    <span>Server is online and healthy! Uptime: ${Math.round(data.uptime)}s</span>
+                    <span>Server is online and healthy! Status: ${data.data.status}</span>
                 `;
             } catch (error) {
                 statusDiv.innerHTML = `
                     <span class="status-indicator status-offline"></span>
-                    <span>Server is offline. Make sure backend is running on port 8080</span>
+                    <span>Server is offline. Vercel API functions not responding</span>
                 `;
             }
         }
