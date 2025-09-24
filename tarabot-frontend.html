@@ -535,7 +535,7 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8080';
+        const API_BASE = window.location.origin;
         let currentUser = null;
         let currentReading = null;
 
@@ -557,7 +557,7 @@
 
         async function authenticateUser() {
             try {
-                const response = await fetch(`${API_BASE}/auth/telegram`, {
+                const response = await fetch(`${API_BASE}/api/auth/telegram`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -588,7 +588,7 @@
             btn.textContent = '🔮 Creating Reading...';
 
             try {
-                const response = await fetch(`${API_BASE}/readings`, {
+                const response = await fetch(`${API_BASE}/api/readings`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -638,7 +638,7 @@
 
         async function generateInterpretation(readingId, context) {
             try {
-                const response = await fetch(`${API_BASE}/ai/interpret`, {
+                const response = await fetch(`${API_BASE}/api/ai/interpret`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

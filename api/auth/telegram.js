@@ -1,10 +1,8 @@
-// Vercel API function for Telegram authentication
-export default async function handler(req, res) {
-  // Enable CORS
-  res.setHeader('Access-Control-Allow-Credentials', true);
+export default function handler(req, res) {
+  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
     res.status(200).end();
@@ -17,38 +15,54 @@ export default async function handler(req, res) {
 
   try {
     const { initData } = req.body;
+    
+    if (!initData) {
+      return res.status(400).json({
+        ok: false,
+        data: null,
+        error: 'initData is required'
+      });
+    }
 
-    // Mock authentication response
-    // In production, you would verify the initData signature
-    const response = {
-      ok: true,
-      data: {
-        accessToken: 'mock_jwt_token_' + Date.now(),
-        refreshToken: 'mock_refresh_token_' + Date.now(),
-        user: {
-          id: 'user_123',
-          telegramId: '123456789',
-          username: 'demo_user',
-          firstName: 'Demo',
-          lastName: 'User',
-          subscription: 'FREE',
-          subscriptionUntil: null,
-          referralCode: 'DEMO123',
-          starsBalance: 0
-        }
-      },
-      error: null
+    // Mock validation for demo purposes
+    // In production, you would validate the Telegram initData here
+    const mockUser = {
+      id: 'demo_user_123',
+      telegramId: '123456789',
+      username: 'demo_user',
+      firstName: 'Demo',
+      lastName: 'User',
+      languageCode: 'en',
+      subscription: 'FREE',
+      subscriptionUntil: null,
+      referralCode: 'DEMO123',
+      referredBy: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
 
-    res.status(200).json(response);
+    // Mock JWT tokens
+    const mockTokens = {
+      accessToken: 'mock_access_token_' + Date.now(),
+      refreshToken: 'mock_refresh_token_' + Date.now(),
+      expiresIn: 900 // 15 minutes
+    };
+
+    res.status(200).json({
+      ok: true,
+      data: {
+        user: mockUser,
+        tokens: mockTokens
+      },
+      error: null
+    });
+
   } catch (error) {
-    res.status(500).json({ 
+    console.error('Auth error:', error);
+    res.status(500).json({
       ok: false,
       data: null,
-      error: {
-        message: 'Authentication failed',
-        details: error.message
-      }
+      error: 'Internal server error'
     });
   }
 }
